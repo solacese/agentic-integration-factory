@@ -1,6 +1,10 @@
 # MDK Reference
 
-Place the Solace MDK reference project or template baseline here, or point `MDK_SAMPLE_ROOT` in `.env` to a different location.
+This repository now includes a local Solace MDK reference baseline at:
+
+`mdk-reference/micro-integration`
+
+That directory is the default target for `MDK_SAMPLE_ROOT` in the prepared demo env files.
 
 Recommended layout:
 

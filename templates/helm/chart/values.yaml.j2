@@ -1,0 +1,16 @@
+image:
+  repository: {{ artifact_id }}
+  tag: {{ service_version }}
+  pullPolicy: IfNotPresent
+
+service:
+  port: 80
+  targetPort: 8080
+
+env:
+  SOLACE_BROKER_URL: ""
+  SOLACE_VPN: ""
+  SOLACE_USERNAME: ""
+  SOLACE_PASSWORD: ""
+  STRIPE_WEBHOOK_SECRET: ""
+

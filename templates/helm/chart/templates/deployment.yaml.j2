@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ service_name }}-integration
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ service_name }}-integration
+  template:
+    metadata:
+      labels:
+        app: {{ service_name }}-integration
+    spec:
+      containers:
+        - name: {{ service_name }}-integration
+          image: "{{ "{{" }} .Values.image.repository {{ "}}" }}:{{ "{{" }} .Values.image.tag {{ "}}" }}"
+          imagePullPolicy: {{ "{{" }} .Values.image.pullPolicy {{ "}}" }}
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SOLACE_BROKER_URL
+              value: {{ "{{" }} .Values.env.SOLACE_BROKER_URL | quote {{ "}}" }}
+            - name: SOLACE_VPN
+              value: {{ "{{" }} .Values.env.SOLACE_VPN | quote {{ "}}" }}
+            - name: SOLACE_USERNAME
+              value: {{ "{{" }} .Values.env.SOLACE_USERNAME | quote {{ "}}" }}
+            - name: SOLACE_PASSWORD
+              value: {{ "{{" }} .Values.env.SOLACE_PASSWORD | quote {{ "}}" }}
+            - name: STRIPE_WEBHOOK_SECRET
+              value: {{ "{{" }} .Values.env.STRIPE_WEBHOOK_SECRET | quote {{ "}}" }}
+

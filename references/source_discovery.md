@@ -34,6 +34,66 @@ Infer:
 - idempotency keys
 - event ordering requirements
 
+## File Discovery
+
+Inspect:
+- file format and encoding
+- field layout and schema shape
+- filename pattern and directory layout
+- arrival cadence and batch windows
+- archive, retry, and quarantine behavior
+
+Infer:
+- file ingestion strategy
+- idempotency key
+- record versus batch event boundary
+- schema evolution risk
+
+## MQTT and Broker Discovery
+
+Inspect:
+- broker type and version
+- topic namespace
+- qos and retained-message behavior
+- payload format
+- authentication and tls mode
+
+Infer:
+- subscriber pattern
+- ordering expectations
+- replay behavior
+- topic to event mapping
+
+## Queue and Stream Discovery
+
+Inspect:
+- queue or topic names
+- ack, nack, or commit semantics
+- dead-letter path
+- replay and retention behavior
+- partition or ordering model
+
+Infer:
+- consumer bridge pattern
+- redelivery strategy
+- poison message handling
+- idempotency and offset strategy
+
+## SFTP, FTP, and Object Storage Discovery
+
+Inspect:
+- host, bucket, or share layout
+- directory or prefix pattern
+- file arrival behavior
+- archive and delete rules
+- authentication model
+
+Infer:
+- polling cadence
+- watermark strategy
+- duplicate prevention strategy
+- source-to-event batch policy
+
 ## Existing Connector Reuse
 
 Search for:
@@ -52,6 +112,7 @@ Decision order:
 
 Discovery must produce:
 - source summary
+- source mode and adapter type
 - chosen connector pattern
 - risk notes
 - proposed event set
@@ -63,3 +124,4 @@ Discovery must produce:
 - Do not mutate source systems during discovery.
 - Do not guess schema semantics when the source can be inspected directly.
 - Flag unclear ownership, missing timestamps, or poor CDC support as risks.
+- Flag weak delivery guarantees, replay ambiguity, or file duplication risk as risks.

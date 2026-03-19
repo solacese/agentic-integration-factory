@@ -15,8 +15,15 @@ Design, build, validate, deploy, govern, document, and operate a production-read
 
 - OpenAPI YAML or JSON
 - database credentials and schema access
+- file inputs such as CSV, JSON, XML, Avro, EDI, fixed-width, PLA, or custom structured files
+- MQTT topics and broker credentials
+- Kafka topics and cluster credentials
+- AMQP, JMS, or queue endpoints
+- webhooks and SaaS APIs
+- SFTP, FTP, object storage, or drop-folder based feeds
 - existing connector or micro-integration codebase
 - existing API endpoint plus credentials
+- multiple sources at once, such as OpenAPI plus database, when the goal is a shared canonical event model across more than one ingress path
 
 ## Golden Lifecycle
 
@@ -27,12 +34,13 @@ Design, build, validate, deploy, govern, document, and operate a production-read
 
 2. **Design**
    - derive the canonical business entities and event model
+   - when multiple sources are provided, unify them under one domain model before choosing how many runtimes to generate
    - choose connector reuse versus new generation
    - define topics, schemas, applications, and versioning
 
 3. **Generate**
    - generate or adapt the MDK-based micro-integration
-   - render runtime config, mapping logic, tests, build files, and deployment assets
+   - render the correct source adapter, runtime config, mapping logic, tests, build files, and deployment assets
 
 4. **Validate**
    - compile the code
@@ -65,14 +73,17 @@ Design, build, validate, deploy, govern, document, and operate a production-read
    - record run metadata, credentials mode, and intended deployment target
 
 2. **Parse and canonicalize**
-   - validate the source contract
-   - extract operations, schemas, auth hints, and business entities
-   - derive a canonical model with events, topics, schemas, applications, and test fixtures
+   - validate the source contract or source shape
+   - extract operations, message layouts, schemas, auth hints, transport details, and business entities
+   - derive a canonical model with events, topics, schemas, applications, test fixtures, and adapter type
+   - if more than one source is present, identify overlaps and produce one shared event model with source-specific ingress notes
 
 3. **Generate with MDK**
    - reuse an existing connector if possible
    - otherwise generate a new Solace MDK-based Java/Maven micro-integration
-   - render REST ingress or source adapters, mapping logic, Dockerfile, deployment assets, tests, and docs
+   - render REST ingress, broker listeners, queue consumers, file watchers, pollers, or custom source adapters as needed
+   - render mapping logic, Dockerfile, deployment assets, tests, and docs
+   - if the sources are materially different, prefer multiple small micro-integrations over one oversized runtime
 
 4. **Test**
    - compile and validate the generated project
@@ -101,6 +112,9 @@ Design, build, validate, deploy, govern, document, and operate a production-read
 2. **Source discovery**
    - if the source is OpenAPI, parse the contract
    - if the source is a database, inspect schemas, tables, foreign keys, update columns, row counts, and CDC readiness
+   - if the source is a file feed, inspect file format, schema shape, naming convention, arrival pattern, and idempotency strategy
+   - if the source is MQTT, Kafka, AMQP, JMS, or a queue, inspect topics, queues, payload format, qos or ack semantics, ordering, and replay behavior
+   - if the source is SFTP, FTP, or object storage, inspect file naming, directory patterns, archive rules, and polling cadence
    - if the source is an existing system, inspect the connector surface, auth model, rate limits, and operational constraints
 
 3. **Connector reuse search**
@@ -112,12 +126,27 @@ Design, build, validate, deploy, govern, document, and operate a production-read
 
 4. **Integration design**
    - infer business entities and lifecycle transitions
+   - if multiple sources exist, decide whether they should become:
+     - one shared integration with multiple adapters, or
+     - multiple integrations that publish into the same canonical event model
+   - choose the correct source adapter pattern:
+     - REST ingress
+     - webhook ingress
+     - database CDC
+     - database polling
+     - file polling
+     - file drop or object storage listener
+     - MQTT subscriber
+     - Kafka consumer
+     - AMQP or JMS consumer
+     - queue bridge
+     - custom adapter
    - generate event names, topic taxonomy, schema names, application names, and version baselines
    - define the producer/consumer ownership and deployment target
 
 5. **Micro-integration generation**
    - generate an MDK-native runtime
-   - add ingress or source adapters, event mapping, Solace publishing, health, metrics, structured logs, containerization, and deployment assets
+   - add the chosen source adapter, event mapping, Solace publishing, health, metrics, structured logs, containerization, and deployment assets
 
 6. **Validation and tests**
    - compile and run tests
@@ -140,6 +169,17 @@ Design, build, validate, deploy, govern, document, and operate a production-read
 10. **Document the result**
    - produce operator documentation, event catalog notes, consumer-facing usage notes, and known limitations
    - leave enough detail for a future engineer or agent to rerun the lifecycle safely
+
+## Multi-Source Rule
+
+When more than one source is provided, such as an OpenAPI contract and a PostgreSQL database:
+
+1. discover both independently
+2. identify the shared business entities
+3. define one canonical topic and schema taxonomy
+4. keep source-specific mappings separate
+5. prefer separate deployable micro-integrations unless there is a strong operational reason to combine them
+6. register the resulting artifacts as one coherent Event Portal design graph
 
 11. **Operate continuously**
    - monitor logs, metrics, traces, correlation IDs, retries, dead-letter flow, drift, and schema changes
@@ -181,6 +221,7 @@ Every completed run must leave:
 - prefer deterministic code generation over free-form AI output
 - use AI after a baseline project exists and only for bounded refinement
 - prefer connector reuse over generating a new connector
+- prefer the narrowest correct adapter over a generic catch-all adapter
 - prefer Kubernetes for HA, EC2 for demos or short-lived runtime paths
 - prefer Event Portal reconciliation over blind creation when artifacts already exist
 - do not call the lifecycle complete until runtime, governance, and documentation are all in place

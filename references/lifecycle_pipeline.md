@@ -6,6 +6,7 @@ Use this file when executing the full end-to-end integration lifecycle.
 
 Inputs:
 - source credentials or uploaded spec
+- source transport details or file layout details
 - target deployment credentials
 - broker credentials
 - Event Portal credentials
@@ -20,11 +21,12 @@ Outputs:
 
 Tasks:
 - inspect the source
-- identify entities, operations, and change boundaries
+- identify entities, operations, message boundaries, or batch boundaries
 - assess source connectivity, reliability, and polling or CDC options
 
 Outputs:
 - discovery report
+- chosen source mode and adapter pattern
 - connector reuse candidates
 - risk notes
 
@@ -35,6 +37,7 @@ Tasks:
 - define topic taxonomy
 - define schema names and application names
 - choose event versions
+- choose the correct source adapter shape
 
 Outputs:
 - canonical model JSON or YAML
@@ -45,7 +48,7 @@ Outputs:
 
 Tasks:
 - render the MDK project
-- generate adapters, mappings, tests, Dockerfile, and deployment assets
+- generate the correct source adapter, mappings, tests, Dockerfile, and deployment assets
 - optionally run a bounded AI refinement pass
 
 Outputs:
@@ -58,7 +61,7 @@ Outputs:
 Tasks:
 - compile
 - run tests
-- verify broker publish path
+- verify broker publish path and source ingestion path
 - reject invalid AI patches
 
 Outputs:
@@ -103,7 +106,7 @@ Outputs:
 
 Tasks:
 - invoke the generated integration
-- verify request, transformation, publish, consume, and UI observation
+- verify ingestion, transformation, publish, consume, and UI observation
 
 Outputs:
 - end-to-end verification record
