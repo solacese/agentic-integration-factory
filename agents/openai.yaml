@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agentic Integration Factory"
+  short_description: "Discover, generate, deploy, and govern Solace-based micro-integrations end to end"
+  default_prompt: "Take over the full lifecycle of this micro-integration: discover the source, reuse or generate the connector, validate it, deploy it, and register the resulting event assets in Solace Event Portal."
