@@ -58,7 +58,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd apps/api
-          uv sync
+          uv sync --frozen
       
       - name: Run tests with coverage
         env:
