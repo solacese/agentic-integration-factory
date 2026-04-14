@@ -1,138 +1,44 @@
-# Contributing to Agentic Integration Factory
+# Contributing Guide
 
-Thank you for your interest in contributing! This guide will help you get started.
+Thank you for contributing to Agentic Integration Factory!
 
-## Getting Started
+## Quick Start
 
-1. Fork the repository and clone your fork
-2. Create a new branch for your feature or bugfix:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-
-## Development Setup
-
-1. Install dependencies:
-   ```bash
-   make install
-   ```
-
-2. Start local services:
-   ```bash
-   make compose-up
-   ```
-
-3. Run database migrations:
-   ```bash
-   make migrate
-   ```
-
-4. Start the development servers:
-   ```bash
-   # Terminal 1: API server
-   make dev-api
-   
-   # Terminal 2: Web app
-   npm run dev
-   ```
-
-## Running Tests
-
-Run the test suite:
 ```bash
+# 1. Fork and clone the repo
+git checkout -b feature/your-feature
+
+# 2. Install dependencies
+make install
+
+# 3. Start services and run migrations
+make compose-up && make migrate
+
+# 4. Run tests
 make test
 ```
 
-Tests must pass with at least 80% code coverage before your PR can be merged.
+## Development
 
-## Code Style
+**API**: `make dev-api` | **Web**: `npm run dev` | **Lint**: `make lint` | **Format**: `make format`
 
-We use automated formatting and linting:
+Use pre-commit hooks: `pip install pre-commit && pre-commit install`
 
-- **Python**: `ruff` for linting and formatting
-- **TypeScript**: ESLint and TypeScript compiler
+## Pull Requests
 
-Run linters:
-```bash
-make lint
-```
+- ✅ Tests pass with 80%+ coverage
+- ✅ Code formatted and linted
+- ✅ Conventional Commits format (`feat:`, `fix:`, `docs:`, etc.)
+- ✅ Documentation updated
 
-Format code:
-```bash
-make format
-```
+## Security
 
-We recommend installing pre-commit hooks:
-```bash
-pip install pre-commit
-pre-commit install
-```
-
-## Type Checking
-
-Python code should pass `mypy` type checking:
-```bash
-cd apps/api
-uv run mypy src/
-```
-
-## Commit Messages
-
-Follow the [Conventional Commits](https://www.conventionalcommits.org/) format:
-
-- `feat:` new features
-- `fix:` bug fixes
-- `docs:` documentation changes
-- `refactor:` code refactoring
-- `test:` test additions or changes
-- `chore:` maintenance tasks
-
-Example:
-```
-feat: add PostgreSQL source adapter
-
-- Implement polling consumer for CDC events
-- Add schema introspection
-- Include integration tests
-```
-
-## Pull Request Process
-
-1. Ensure all tests pass and coverage meets the threshold
-2. Update documentation for any new features
-3. Add entries to relevant sections if introducing breaking changes
-4. Request review from maintainers
-
-### PR Checklist
-
-- [ ] Tests pass locally (`make test`)
-- [ ] Code is formatted (`make format`)
-- [ ] Linters pass (`make lint`)
-- [ ] Documentation updated (if applicable)
-- [ ] Commit messages follow conventions
-
-## Adding New Source Adapters
-
-To add a new source type:
-
-1. Create a new adapter in `apps/api/src/spec2event/adapters/source/`
-2. Implement the `SourceAdapter` interface:
-   - `parse()`: Parse raw input into structured data
-   - `summarize()`: Generate human-readable summary
-   - `canonicalize()`: Transform into canonical event model
-3. Register the adapter in `__init__.py`
-4. Add tests in `apps/api/tests/`
-5. Update documentation in `references/source_adapter_matrix.md`
+**Do not open public issues for security vulnerabilities.** Report privately via [GitHub Security Advisories](https://github.com/solacese/agentic-integration-factory/security/advisories) or email security@solace.com.
 
 ## Code of Conduct
 
-This project adheres to the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
-
-## Questions?
-
-- Open an issue for bug reports or feature requests
-- Start a discussion for questions or ideas
+Be respectful and inclusive. Harassment, discrimination, and inappropriate behavior are not tolerated. See [Contributor Covenant v2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/) for details.
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the Apache License 2.0.
+Contributions are licensed under Apache 2.0.

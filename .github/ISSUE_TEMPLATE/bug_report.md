@@ -1,57 +1,33 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Report a bug
 title: '[BUG] '
 labels: bug
-assignees: ''
 ---
 
-## Describe the bug
+## Bug Description
 
-A clear and concise description of what the bug is.
+[Clear description of the bug]
 
-## To Reproduce
+## Steps to Reproduce
 
-Steps to reproduce the behavior:
-1. Set up environment with '...'
-2. Run command '...'
-3. Navigate to '...'
-4. See error
+1. 
+2. 
+3. 
 
-## Expected behavior
+## Expected vs Actual
 
-A clear and concise description of what you expected to happen.
-
-## Actual behavior
-
-What actually happened.
-
-## Screenshots
-
-If applicable, add screenshots to help explain your problem.
+**Expected:** [what should happen]
+**Actual:** [what actually happened]
 
 ## Environment
 
-- OS: [e.g. macOS, Ubuntu 22.04]
-- Python version: [e.g. 3.13]
-- Node version: [e.g. 20.x]
-- Repository version/commit: [e.g. main@abc123]
-
-## Source configuration
-
-- Source type: [e.g. OpenAPI, PostgreSQL, JSON Schema]
-- Demo mode: [e.g. `openapi`, `postgres`, `hybrid`]
+- OS: 
+- Python: 
+- Node: 
+- Commit: 
 
 ## Logs
 
 ```
-Please paste any relevant log output here.
-Use code blocks for better readability.
-```
-
-## Additional context
-
-Add any other context about the problem here. For example:
-- What you were trying to accomplish
-- Any recent changes to your setup
-- Links to related issues or discussions
+[paste relevant logs]
