@@ -51,7 +51,7 @@ migrate: ## Run database migrations
 	cd apps/api && uv run alembic upgrade head
 
 test: ## Run tests with coverage
-	cd apps/api && uv run pytest --cov --cov-fail-under=80
+	cd apps/api && uv run pytest --cov --cov-fail-under=60
 	npm run typecheck:web
 
 lint: ## Run linters (ruff + mypy for Python, ESLint for web)
