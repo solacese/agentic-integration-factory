@@ -1,0 +1,45 @@
+spring:
+  cloud:
+    function:
+      definition: "testConsumer;otherTestConsumer"
+    stream:
+      binders:
+        simple-queuing-1:
+          type: simple-queuing
+#          environment:
+#            simple-queuing:
+#              base-url: <injected from @DynamicPropertySource>
+        simple-queuing-2:
+          type: simple-queuing
+#          environment:
+#            simple-queuing:
+#              base-url: <injected from @DynamicPropertySource>
+      bindings:
+        testConsumer-in-0:
+          destination: source-destination
+          binder: simple-queuing-1
+          group: test-group-1
+        otherTestConsumer-in-0:
+          destination: source-destination
+          binder: simple-queuing-2
+          group: test-group-2
+      default-binder: simple-queuing-1
+
+management:
+  endpoint:
+    health:
+      show-components: always
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: 'health'
+  health:
+    binders:
+      enabled: true
+
+# Logging configuration for tests
+logging:
+  level:
+    root: INFO
+    com.solace.samples.binder.simplequeuing: DEBUG

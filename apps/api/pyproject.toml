@@ -29,6 +29,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+  "mypy==1.14.1",
   "pytest==8.4.2",
   "pytest-cov==7.0.0",
   "ruff==0.14.2"
@@ -48,3 +49,32 @@ select = ["E", "F", "I", "N", "B", "UP", "ASYNC"]
 pythonpath = ["src"]
 testpaths = ["tests"]
 markers = ["integration: exercises generated project build and packaging flow"]
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+omit = [
+  "*/tests/*",
+  "*/alembic/*",
+]
+
+[tool.coverage.report]
+fail_under = 80
+precision = 2
+show_missing = true
+skip_covered = false
+
+[tool.mypy]
+python_version = "3.13"
+strict = false
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+disallow_any_generics = false
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+follow_imports = "normal"
+ignore_missing_imports = true

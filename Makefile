@@ -1,66 +1,75 @@
 SHELL := /bin/zsh
 
-.PHONY: install install-api install-web compose-up compose-down dev-api dev-worker migrate test lint format build-web demo-ec2-up demo-ec2-down demo-ec2-status use-demo-openapi use-demo-postgres use-demo-hybrid preflight bootstrap
+.PHONY: help install install-api install-web compose-up compose-down dev-api dev-worker migrate test lint format build-web demo-ec2-up demo-ec2-down demo-ec2-status use-demo-openapi use-demo-postgres use-demo-hybrid preflight bootstrap
 
-install: install-api install-web
+.DEFAULT_GOAL := help
 
-install-api:
+help: ## Show this help message
+	@echo 'Usage: make [target]'
+	@echo ''
+	@echo 'Available targets:'
+	@awk 'BEGIN {FS = ":.*##"; printf ""} /^[a-zA-Z_-]+:.*?##/ { printf "  %-20s %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
+
+install: install-api install-web ## Install all dependencies (API + web)
+
+install-api: ## Install API dependencies
 	cd apps/api && uv sync
 
-install-web:
+install-web: ## Install web dependencies
 	npm install
 
-use-demo-openapi:
+use-demo-openapi: ## Set up OpenAPI demo environment
 	./scripts/use_demo_env.sh openapi
 
-use-demo-postgres:
+use-demo-postgres: ## Set up PostgreSQL demo environment
 	./scripts/use_demo_env.sh postgres
 
-use-demo-hybrid:
+use-demo-hybrid: ## Set up hybrid demo environment
 	./scripts/use_demo_env.sh hybrid
 
-preflight:
+preflight: ## Validate environment configuration
 	cd apps/api && uv run python ../../scripts/preflight.py --env-file ../../.env
 
-bootstrap:
+bootstrap: ## Bootstrap the entire project (install + compose + migrate)
 	make install
 	make compose-up
 	make migrate
 
-compose-up:
+compose-up: ## Start local docker services (postgres, redis)
 	docker compose -f infra/docker/compose.yaml up -d postgres redis
 
-compose-down:
+compose-down: ## Stop local docker services
 	docker compose -f infra/docker/compose.yaml down
 
-dev-api:
+dev-api: ## Start API development server
 	cd apps/api && uv run uvicorn spec2event.main:app --reload --host 0.0.0.0 --port 8000
 
-dev-worker:
+dev-worker: ## Start background worker
 	cd apps/api && uv run python -m spec2event.worker
 
-migrate:
+migrate: ## Run database migrations
 	cd apps/api && uv run alembic upgrade head
 
-test:
-	cd apps/api && uv run pytest
+test: ## Run tests with coverage
+	cd apps/api && uv run pytest --cov --cov-fail-under=80
 	npm run typecheck:web
 
-lint:
+lint: ## Run linters (ruff + mypy for Python, ESLint for web)
 	cd apps/api && uv run ruff check .
+	cd apps/api && uv run mypy src/
 	npm run lint:web
 
-format:
+format: ## Format code with ruff
 	cd apps/api && uv run ruff format .
 
-build-web:
+build-web: ## Build web application
 	npm run build:web
 
-demo-ec2-up:
+demo-ec2-up: ## Launch EC2 control plane demo
 	cd apps/api && uv run python -m spec2event.control_plane up
 
-demo-ec2-down:
+demo-ec2-down: ## Tear down EC2 control plane demo
 	cd apps/api && uv run python -m spec2event.control_plane down
 
-demo-ec2-status:
+demo-ec2-status: ## Check EC2 control plane status
 	cd apps/api && uv run python -m spec2event.control_plane status

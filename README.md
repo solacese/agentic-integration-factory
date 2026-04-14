@@ -1,5 +1,10 @@
 # Agentic Integration Factory
 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![Tests](https://github.com/solacese/agentic-integration-factory/actions/workflows/test.yml/badge.svg)](https://github.com/solacese/agentic-integration-factory/actions/workflows/test.yml)
+[![Python](https://img.shields.io/badge/python-3.13-blue.svg)](https://www.python.org/downloads/)
+[![Code style: ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+
 Open-source starter repo for an agent-driven micro-integration factory:
 
 `discover -> design -> generate -> validate -> deploy -> govern`
