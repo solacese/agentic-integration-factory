@@ -37,18 +37,24 @@ async function ensureOk(response: Response) {
   return response;
 }
 
-export async function uploadSpec(file: File) {
+export async function uploadSpec(file: File, sourceType: string = "openapi") {
   const formData = new FormData();
   formData.append("file", file);
+  formData.append("source_type", sourceType);
   const base = apiBase();
   const response = await ensureOk(
     await fetch(`${base}/api/uploads`, {
-      // requests resolve through nginx in production and directly to FastAPI in local dev
       method: "POST",
       headers: adminHeaders(),
       body: formData
     })
   );
+  return response.json();
+}
+
+export async function getSourceTypes(): Promise<string[]> {
+  const base = apiBase();
+  const response = await ensureOk(await fetch(`${base}/api/source-types`, { cache: "no-store" }));
   return response.json();
 }
 

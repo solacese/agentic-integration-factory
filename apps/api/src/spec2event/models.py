@@ -29,10 +29,11 @@ class DemoAdmin(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 
-class OpenApiUpload(Base):
+class SourceUpload(Base):
     __tablename__ = "openapi_uploads"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    source_type: Mapped[str] = mapped_column(String(50), default="openapi")
     filename: Mapped[str] = mapped_column(String(255))
     content_type: Mapped[str] = mapped_column(String(120))
     raw_content: Mapped[str] = mapped_column(Text)
@@ -42,11 +43,16 @@ class OpenApiUpload(Base):
     runs: Mapped[list[GenerationRun]] = relationship(back_populates="upload")
 
 
+# Backward-compatibility alias
+OpenApiUpload = SourceUpload
+
+
 class GenerationRun(Base, TimestampMixin):
     __tablename__ = "generation_runs"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
     upload_id: Mapped[str] = mapped_column(ForeignKey("openapi_uploads.id", ondelete="CASCADE"))
+    source_type: Mapped[str] = mapped_column(String(50), default="openapi")
     service_name: Mapped[str] = mapped_column(String(255))
     status: Mapped[str] = mapped_column(String(50), default="pending")
     deployment_target: Mapped[str] = mapped_column(String(50), default="local_docker")
@@ -56,7 +62,7 @@ class GenerationRun(Base, TimestampMixin):
     last_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     canonical_model_json: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
 
-    upload: Mapped[OpenApiUpload] = relationship(back_populates="runs")
+    upload: Mapped[SourceUpload] = relationship(back_populates="runs")
     artifacts: Mapped[list[GeneratedArtifact]] = relationship(back_populates="run")
     deployment_records: Mapped[list[Deployment]] = relationship(back_populates="run")
     event_portal_syncs: Mapped[list[EventPortalSync]] = relationship(back_populates="run")

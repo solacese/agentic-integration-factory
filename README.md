@@ -4,13 +4,27 @@ Open-source starter repo for an agent-driven micro-integration factory:
 
 `discover -> design -> generate -> validate -> deploy -> govern`
 
-It includes:
+It turns **any source** — OpenAPI specs, JSON Schemas, database credentials, or custom inputs — into a production-ready **Solace MDK micro-integration** with canonical event models, workflow routing, and Event Portal governance.
 
-- a runnable control-plane app
-- an agent skill and runbook
-- bundled Solace MDK generator templates
-- demo-ready OpenAPI and PostgreSQL inputs
-- EC2, Solace, Event Portal, and LiteLLM demo bundles
+## Key Capabilities
+
+- **Source-agnostic ingestion** — pluggable source adapters handle parsing, summarization, and canonicalization for each input type
+- **Real Solace MDK output** — generated projects use the `micro-integration-build-parent`, pre-created bindings, workflow routing, and `BindingCapabilitiesFactory` beans (based on `solace-mdk-samples-main`)
+- **Multiple ingress patterns** — REST controllers, polling consumers, or event subscribers depending on the source type
+- **Full lifecycle** — generation, build, deploy, test, Event Portal sync, and AI refinement in one pipeline
+- **Agent-native** — comes with a skill definition and lifecycle runbook for autonomous operation
+
+## Supported Source Types
+
+| Source Type | Input | Ingress Pattern |
+|-------------|-------|-----------------|
+| **OpenAPI** | YAML/JSON spec | REST controller |
+| **JSON Schema** | `.schema.json` file | REST controller (synthetic CRUD) |
+| **Database** | Connection credentials | Polling consumer |
+| **MQTT / Kafka** | Broker config | Event subscriber |
+| **Custom** | Any structured input | Implement `SourceAdapter` |
+
+Adding a new source type requires implementing three methods (`parse`, `summarize`, `canonicalize`) in a `SourceAdapter` subclass. The pipeline, generator, build, deploy, and governance layers need zero changes.
 
 ## Start Here
 
@@ -46,35 +60,92 @@ npm run dev
 make demo-ec2-up
 ```
 
+## What Gets Generated
+
+Every run produces a complete Solace MDK micro-integration project:
+
+```
+workspace/
+├── pom.xml                          # MDK build parent (3.0.6)
+├── Dockerfile                       # Multi-stage build with external config support
+├── config/application-runtime.yml   # Workflow → destination mappings
+├── src/main/resources/
+│   └── application.yml              # MDK internal config (20 bindings, workflows, Solace defaults)
+├── src/main/java/.../
+│   ├── MicroIntegrationApplication.java           # Spring Boot + MDK bean declarations
+│   ├── binding/
+│   │   ├── SourceConsumerBindingCapabilitiesFactory.java  # Consumer ack mode
+│   │   └── SourceProducerBindingCapabilitiesFactory.java  # Producer ack mode
+│   ├── api/
+│   │   └── GeneratedApiController.java            # REST ingress (when applicable)
+│   └── service/
+│       ├── CanonicalEventService.java             # Operation → event mapping
+│       └── SolacePublisherService.java            # Solace StreamBridge publishing
+├── helm/                            # Kubernetes Helm chart
+└── scripts/demo-curls.sh            # Test fixtures
+```
+
 ## Demo Bundles
 
-All prepared demo inputs live in [demo](/Users/raphaelcaillon/Documents/github/agentic-integration-factory/demo):
+All prepared demo inputs live in [demo](demo):
 
-- OpenAPI demo env: [demo/env/openapi.env](/Users/raphaelcaillon/Documents/github/agentic-integration-factory/demo/env/openapi.env)
-- PostgreSQL demo env: [demo/env/postgres.env](/Users/raphaelcaillon/Documents/github/agentic-integration-factory/demo/env/postgres.env)
-- Hybrid demo env: [demo/env/hybrid.env](/Users/raphaelcaillon/Documents/github/agentic-integration-factory/demo/env/hybrid.env)
-- OpenAPI prompt: [demo/prompts/openapi_ec2_event_portal.md](/Users/raphaelcaillon/Documents/github/agentic-integration-factory/demo/prompts/openapi_ec2_event_portal.md)
-- PostgreSQL prompt: [demo/prompts/postgres_ec2_event_portal.md](/Users/raphaelcaillon/Documents/github/agentic-integration-factory/demo/prompts/postgres_ec2_event_portal.md)
-- Hybrid prompt: [demo/prompts/openapi_postgres_ec2_event_portal.md](/Users/raphaelcaillon/Documents/github/agentic-integration-factory/demo/prompts/openapi_postgres_ec2_event_portal.md)
+- OpenAPI demo env: [demo/env/openapi.env](demo/env/openapi.env)
+- PostgreSQL demo env: [demo/env/postgres.env](demo/env/postgres.env)
+- Hybrid demo env: [demo/env/hybrid.env](demo/env/hybrid.env)
+- OpenAPI prompt: [demo/prompts/openapi_ec2_event_portal.md](demo/prompts/openapi_ec2_event_portal.md)
+- PostgreSQL prompt: [demo/prompts/postgres_ec2_event_portal.md](demo/prompts/postgres_ec2_event_portal.md)
+- Hybrid prompt: [demo/prompts/openapi_postgres_ec2_event_portal.md](demo/prompts/openapi_postgres_ec2_event_portal.md)
 
 The helper script copies one of those env bundles into the active root `.env`.
 
+## Sample Inputs
+
+- [samples/openapi/petstore.yaml](samples/openapi/petstore.yaml) — simple Petstore API
+- [samples/openapi/stripe-webhook-demo.yaml](samples/openapi/stripe-webhook-demo.yaml) — Stripe webhook integration
+- [samples/json_schema/order.schema.json](samples/json_schema/order.schema.json) — e-commerce order schema
+
 ## Main Folders
 
-- [SKILL.md](/Users/raphaelcaillon/Documents/github/agentic-integration-factory/SKILL.md)
-  - agent entry point
-- [create_micro_integrations.md](/Users/raphaelcaillon/Documents/github/agentic-integration-factory/create_micro_integrations.md)
-  - lifecycle runbook
-- [apps/api](/Users/raphaelcaillon/Documents/github/agentic-integration-factory/apps/api)
-  - FastAPI orchestrator and adapters
-- [apps/web](/Users/raphaelcaillon/Documents/github/agentic-integration-factory/apps/web)
-  - Next.js UI
-- [templates](/Users/raphaelcaillon/Documents/github/agentic-integration-factory/templates)
-  - MDK and Helm generation templates
-- [samples](/Users/raphaelcaillon/Documents/github/agentic-integration-factory/samples)
-  - bundled source inputs
-- [references](/Users/raphaelcaillon/Documents/github/agentic-integration-factory/references)
-  - deeper design and Event Portal guidance
+- [SKILL.md](SKILL.md)
+  — agent entry point
+- [create_micro_integrations.md](create_micro_integrations.md)
+  — lifecycle runbook
+- [apps/api](apps/api)
+  — FastAPI orchestrator, source adapters, and deployment adapters
+- [apps/web](apps/web)
+  — Next.js UI with source type selector
+- [templates](templates)
+  — Solace MDK and Helm generation templates
+- [mdk-reference](mdk-reference)
+  — local MDK baseline (from solace-mdk-samples-main)
+- [samples](samples)
+  — bundled source inputs (OpenAPI, JSON Schema)
+- [references](references)
+  — deeper design and Event Portal guidance
+
+## Architecture
+
+```
+Source Input (OpenAPI, JSON Schema, DB, MQTT, ...)
+  │
+  ▼
+Source Adapter  ─── parse() → summarize() → canonicalize()
+  │
+  ▼
+Canonical Event Model  (operations, topics, schemas, test fixtures)
+  │
+  ▼
+Generator Service  ─── Jinja2 templates → Solace MDK project
+  │                     (workflows, bindings, capabilities factories)
+  ▼
+Build Pipeline  ─── Docker build (local or ECR)
+  │
+  ▼
+Deploy Pipeline  ─── Docker / EC2 / Kubernetes
+  │
+  ▼
+Event Portal Sync  ─── domains, apps, schemas, events
+```
 
 ## Minimal Agent Prompt
 
@@ -99,6 +170,7 @@ The run is only complete when runtime, governance, and documentation are all in 
 
 ## Notes
 
-- Use [.env.example](/Users/raphaelcaillon/Documents/github/agentic-integration-factory/.env.example) as the base config template.
-- Use [samples/openapi/petstore.yaml](/Users/raphaelcaillon/Documents/github/agentic-integration-factory/samples/openapi/petstore.yaml) for the simplest API-first demo.
-- Use [references/postgres_demo_source_notes.md](/Users/raphaelcaillon/Documents/github/agentic-integration-factory/references/postgres_demo_source_notes.md) for the validated PostgreSQL source shape.
+- Use [.env.example](.env.example) as the base config template.
+- Use [samples/openapi/petstore.yaml](samples/openapi/petstore.yaml) for the simplest API-first demo.
+- Use [samples/json_schema/order.schema.json](samples/json_schema/order.schema.json) for a schema-first demo.
+- Use [references/postgres_demo_source_notes.md](references/postgres_demo_source_notes.md) for the validated PostgreSQL source shape.

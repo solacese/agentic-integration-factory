@@ -8,6 +8,7 @@ import {
   getEventLogs,
   getRun,
   getSettings,
+  getSourceTypes,
   invokeTest,
   uploadSpec,
 } from "@/lib/api";
@@ -26,6 +27,8 @@ export default function HomePage() {
   const [message, setMessage] = useState("Ready");
   const [activeFixtureId, setActiveFixtureId] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
+  const [sourceTypes, setSourceTypes] = useState<string[]>(["openapi"]);
+  const [selectedSourceType, setSelectedSourceType] = useState("openapi");
   const pollRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -36,6 +39,7 @@ export default function HomePage() {
       .then(() => {
         setAuthenticated(true);
         setAuthMessage("Unlocked");
+        getSourceTypes().then(setSourceTypes).catch(() => {});
       })
       .catch(() => {
         window.sessionStorage.removeItem("demo-admin-password");
@@ -90,6 +94,7 @@ export default function HomePage() {
       await getSettings();
       setAuthenticated(true);
       setAuthMessage("Unlocked");
+      getSourceTypes().then(setSourceTypes).catch(() => {});
     } catch (error) {
       window.sessionStorage.removeItem("demo-admin-password");
       setAuthenticated(false);
@@ -104,7 +109,7 @@ export default function HomePage() {
     setEvents([]);
     setActiveFixtureId(null);
     try {
-      const upload = await uploadSpec(file);
+      const upload = await uploadSpec(file, selectedSourceType);
       setMessage("Generating");
       const nextRun = await createRun({
         uploadId: upload.uploadId,
@@ -176,19 +181,37 @@ export default function HomePage() {
             ) : null}
 
             {authenticated && !working ? (
-              <label className="upload-drop upload-drop-large">
-                <input
-                  accept=".yaml,.yml,.json"
-                  disabled={!authenticated || working}
-                  onChange={(event) => {
-                    const nextFile = event.target.files?.[0] ?? null;
-                    event.currentTarget.value = "";
-                    handleFileSelected(nextFile);
-                  }}
-                  type="file"
-                />
-                <span>Upload spec</span>
-              </label>
+              <div className="stack" style={{ gap: "0.5rem" }}>
+                {sourceTypes.length > 1 ? (
+                  <div className="source-type-selector">
+                    <label htmlFor="source-type-select" className="muted">Source type</label>
+                    <select
+                      id="source-type-select"
+                      value={selectedSourceType}
+                      onChange={(event) => setSelectedSourceType(event.target.value)}
+                    >
+                      {sourceTypes.map((st) => (
+                        <option key={st} value={st}>
+                          {st.replace(/_/g, " ")}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : null}
+                <label className="upload-drop upload-drop-large">
+                  <input
+                    accept=".yaml,.yml,.json,.schema.json"
+                    disabled={!authenticated || working}
+                    onChange={(event) => {
+                      const nextFile = event.target.files?.[0] ?? null;
+                      event.currentTarget.value = "";
+                      handleFileSelected(nextFile);
+                    }}
+                    type="file"
+                  />
+                  <span>Upload source</span>
+                </label>
+              </div>
             ) : null}
 
             {authenticated && working ? (

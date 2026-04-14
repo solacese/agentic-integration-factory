@@ -45,6 +45,7 @@ class Settings(BaseSettings):
     templates_root: Path = REPO_ROOT / "templates"
     runs_root: Path = REPO_ROOT / "generated-runs"
     mdk_sample_root: Path = REPO_ROOT / "mdk-reference" / "micro-integration"
+    source_mode: str = "openapi"
     enable_rq: bool = False
     log_level: str = "INFO"
     local_deploy_port: int = 18080

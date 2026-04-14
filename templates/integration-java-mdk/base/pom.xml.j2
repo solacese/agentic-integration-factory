@@ -45,7 +45,25 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-configuration-processor</artifactId>
+      <optional>true</optional>
+    </dependency>
+
+    <!-- Test Dependencies -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>com.vaadin.external.google</groupId>
+          <artifactId>android-json</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.solace.connector.core.test</groupId>
+      <artifactId>pubsubplus-connector-framework-test-support-utilities</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -60,6 +78,13 @@
         <groupId>com.google.cloud.tools</groupId>
         <artifactId>jib-maven-plugin</artifactId>
         <version>3.4.6</version>
+        <dependencies>
+          <dependency>
+            <groupId>com.google.cloud.tools</groupId>
+            <artifactId>jib-spring-boot-extension-maven</artifactId>
+            <version>0.1.0</version>
+          </dependency>
+        </dependencies>
         <configuration>
           <from>
             <image>eclipse-temurin:17-jre-alpine</image>
@@ -69,10 +94,25 @@
           </to>
           <container>
             <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
+            <args>
+              <arg>--spring.config.additional-location=optional:file:/app/external/spring/config/,optional:file:/app/external/spring/config/*/</arg>
+            </args>
+            <extraClasspath>
+              <path>/app/external/classpath/</path>
+              <path>/app/external/libs/*</path>
+            </extraClasspath>
+            <ports>
+              <port>8080</port>
+            </ports>
+            <format>Docker</format>
           </container>
+          <pluginExtensions>
+            <pluginExtension>
+              <implementation>com.google.cloud.tools.jib.maven.extension.springboot.JibSpringBootExtension</implementation>
+            </pluginExtension>
+          </pluginExtensions>
         </configuration>
       </plugin>
     </plugins>
   </build>
 </project>
-

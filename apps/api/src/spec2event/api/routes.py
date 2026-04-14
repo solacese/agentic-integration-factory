@@ -4,10 +4,11 @@ import json
 import time
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
+from spec2event.adapters.source.registry import available_source_types, get_source_adapter
 from spec2event.db import SessionLocal, get_db
 from spec2event.models import EventLog, EventPortalSync, GeneratedArtifact, GenerationRun
 from spec2event.schemas import (
@@ -23,7 +24,6 @@ from spec2event.schemas import (
     UploadPreviewResponse,
 )
 from spec2event.security import require_admin
-from spec2event.services.openapi_service import load_openapi_document, summarize_openapi
 from spec2event.services.pipeline import invoke_test
 from spec2event.services.queue_service import enqueue_build, enqueue_deploy, enqueue_generation
 from spec2event.services.run_service import (
@@ -61,27 +61,40 @@ def _dump_event_payload(event: EventLog) -> str:
     return json.dumps(payload.model_dump(by_alias=True))
 
 
+@router.get("/source-types")
+def list_source_types() -> list[str]:
+    return available_source_types()
+
+
 @router.post("/uploads", response_model=UploadPreviewResponse)
-async def upload_openapi(
-    file: UploadSpecFile, db: DbSession, _: AdminAccess
+async def upload_source(
+    file: UploadSpecFile,
+    db: DbSession,
+    _: AdminAccess,
+    source_type: str = Form("openapi"),
 ) -> UploadPreviewResponse:
+    if source_type not in available_source_types():
+        raise HTTPException(status_code=400, detail=f"Unknown source_type: {source_type}")
+    adapter = get_source_adapter(source_type)
     raw_bytes = await file.read()
     raw_content = raw_bytes.decode("utf-8")
-    document = load_openapi_document(raw_content)
-    summary = summarize_openapi(document)
+    parse_result = adapter.parse(raw_content)
+    summary_result = adapter.summarize(parse_result.document)
     upload = create_upload(
         db,
-        file.filename or "spec.yaml",
-        file.content_type or "application/yaml",
+        file.filename or "source-input",
+        file.content_type or "application/octet-stream",
         raw_content,
-        summary,
+        summary_result.summary,
+        source_type=source_type,
     )
     db.commit()
     return UploadPreviewResponse(
         upload_id=upload.id,
         filename=upload.filename,
-        service_name=summary["serviceName"],
-        summary=summary,
+        source_type=source_type,
+        service_name=summary_result.service_name,
+        summary=summary_result.summary,
     )
 
 

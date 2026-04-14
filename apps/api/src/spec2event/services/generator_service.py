@@ -24,7 +24,7 @@ class GeneratorService:
         self,
         run_id: str,
         canonical_model: dict[str, Any],
-        openapi_summary: dict[str, Any],
+        source_summary: dict[str, Any],
         raw_spec: str,
     ) -> Path:
         settings = get_settings()
@@ -33,7 +33,10 @@ class GeneratorService:
             shutil.rmtree(workspace)
         workspace.mkdir(parents=True, exist_ok=True)
 
-        context = self._build_context(canonical_model, openapi_summary)
+        context = self._build_context(canonical_model, source_summary)
+        ingress_type = canonical_model.get("ingressType", "rest_controller")
+
+        # -- Core Solace MDK files (always generated) --
         self._write(
             workspace / "pom.xml", self._render("integration-java-mdk/base/pom.xml.j2", context)
         )
@@ -48,18 +51,10 @@ class GeneratorService:
             workspace / "src/main/resources/application.yml",
             self._render("integration-java-mdk/base/application.yml.j2", context),
         )
-        self._write(workspace / "src/main/resources/openapi-source.yaml", raw_spec)
+        self._write(workspace / "src/main/resources/source-spec.txt", raw_spec)
         self._write(
             workspace / "src/main/java/com/spec2event/generated/MicroIntegrationApplication.java",
             self._render("integration-java-mdk/base/MicroIntegrationApplication.java.j2", context),
-        )
-        self._write(
-            workspace / "src/main/java/com/spec2event/generated/api/GeneratedApiController.java",
-            self._render("integration-java-mdk/base/GeneratedApiController.java.j2", context),
-        )
-        self._write(
-            workspace / "src/main/java/com/spec2event/generated/api/StripeWebhookController.java",
-            self._render("integration-java-mdk/base/StripeWebhookController.java.j2", context),
         )
         self._write(
             workspace / "src/main/java/com/spec2event/generated/service/CanonicalEventService.java",
@@ -69,11 +64,6 @@ class GeneratorService:
             workspace
             / "src/main/java/com/spec2event/generated/service/SolacePublisherService.java",
             self._render("integration-java-mdk/base/SolacePublisherService.java.j2", context),
-        )
-        self._write(
-            workspace
-            / "src/main/java/com/spec2event/generated/service/StripeSignatureVerifier.java",
-            self._render("integration-java-mdk/base/StripeSignatureVerifier.java.j2", context),
         )
         self._write(
             workspace / "src/test/java/com/spec2event/generated/CanonicalEventServiceTest.java",
@@ -98,6 +88,74 @@ class GeneratorService:
             self._render("integration-java-mdk/base/demo-curls.sh.j2", context),
         )
         self._write(workspace / "ui/ui-metadata.json", json.dumps(context["ui_metadata"], indent=2))
+
+        # -- MDK binding capabilities factories (always generated) --
+        self._write(
+            workspace
+            / "src/main/java/com/spec2event/generated/binding"
+            / "SourceConsumerBindingCapabilitiesFactory.java",
+            self._render(
+                "integration-java-mdk/base/SourceConsumerBindingCapabilitiesFactory.java.j2",
+                context,
+            ),
+        )
+        self._write(
+            workspace
+            / "src/main/java/com/spec2event/generated/binding"
+            / "SourceProducerBindingCapabilitiesFactory.java",
+            self._render(
+                "integration-java-mdk/base/SourceProducerBindingCapabilitiesFactory.java.j2",
+                context,
+            ),
+        )
+
+        # -- Runtime config overlay (maps workflows to Solace destinations) --
+        self._write(
+            workspace / "config/application-runtime.yml",
+            self._render("integration-java-mdk/base/application-runtime.yml.j2", context),
+        )
+
+        # -- Ingress adapter (varies by source type) --
+        if ingress_type == "rest_controller":
+            self._write(
+                workspace
+                / "src/main/java/com/spec2event/generated/api/GeneratedApiController.java",
+                self._render(
+                    "integration-java-mdk/base/GeneratedApiController.java.j2", context
+                ),
+            )
+            if context.get("stripe_enabled"):
+                self._write(
+                    workspace
+                    / "src/main/java/com/spec2event/generated/api/StripeWebhookController.java",
+                    self._render(
+                        "integration-java-mdk/base/StripeWebhookController.java.j2", context
+                    ),
+                )
+                self._write(
+                    workspace
+                    / "src/main/java/com/spec2event/generated/service/StripeSignatureVerifier.java",
+                    self._render(
+                        "integration-java-mdk/base/StripeSignatureVerifier.java.j2", context
+                    ),
+                )
+        elif ingress_type == "polling_consumer":
+            self._write(
+                workspace
+                / "src/main/java/com/spec2event/generated/service/PollingConsumerService.java",
+                self._render(
+                    "integration-java-mdk/base/PollingConsumerService.java.j2", context
+                ),
+            )
+        elif ingress_type == "event_subscriber":
+            self._write(
+                workspace
+                / "src/main/java/com/spec2event/generated/service/EventSubscriberService.java",
+                self._render(
+                    "integration-java-mdk/base/EventSubscriberService.java.j2", context
+                ),
+            )
+
         return workspace
 
     def _render(self, template_name: str, context: dict[str, Any]) -> str:
@@ -108,7 +166,7 @@ class GeneratorService:
         path.write_text(content, encoding="utf-8")
 
     def _build_context(
-        self, canonical_model: dict[str, Any], openapi_summary: dict[str, Any]
+        self, canonical_model: dict[str, Any], source_summary: dict[str, Any]
     ) -> dict[str, Any]:
         event_bindings = []
         for operation in canonical_model["operations"]:
@@ -149,6 +207,21 @@ class GeneratorService:
                     "emitsEvent": operation["emitsEvent"],
                 }
             )
+        ingress_type = canonical_model.get("ingressType", "rest_controller")
+        source_binder_type = _source_binder_type(ingress_type)
+
+        workflows = []
+        for index, binding in enumerate(unique_bindings.values()):
+            workflows.append(
+                {
+                    "index": index,
+                    "input_binder": source_binder_type,
+                    "input_destination": binding["topicName"],
+                    "output_binder": "solace",
+                    "output_destination": binding["topicName"],
+                }
+            )
+
         return {
             "title": canonical_model["title"],
             "service_name": canonical_model["serviceName"],
@@ -157,6 +230,9 @@ class GeneratorService:
             "application_name": f"{canonical_model['serviceName']}-integration",
             "event_bindings": list(unique_bindings.values()),
             "operations": operations,
+            "workflows": workflows,
+            "source_binder_type": source_binder_type,
+            "ingress_type": ingress_type,
             "stripe_enabled": canonical_model["stripeEnabled"],
             "ui_metadata": {
                 "serviceName": canonical_model["serviceName"],
@@ -168,8 +244,17 @@ class GeneratorService:
                 "applicationNames": canonical_model["applicationNames"],
             },
             "canonical_model_json": json.dumps(canonical_model, indent=2),
-            "openapi_summary_json": json.dumps(openapi_summary, indent=2),
+            "source_summary_json": json.dumps(source_summary, indent=2),
         }
+
+
+def _source_binder_type(ingress_type: str) -> str:
+    """Map ingress type to the Spring Cloud Stream binder type name."""
+    return {
+        "rest_controller": "solace",
+        "polling_consumer": "polling",
+        "event_subscriber": "external",
+    }.get(ingress_type, "solace")
 
 
 def _camel(value: str) -> str:

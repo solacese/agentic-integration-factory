@@ -79,7 +79,7 @@ def test_generation_pipeline_persists_failure_progress(monkeypatch, tmp_path: Pa
         assert run.last_message == "generation exploded"
 
         step_states = [(step.step_name, step.status, step.message) for step in run.step_logs]
-        assert ("uploaded", "completed", "OpenAPI upload accepted") in step_states
+        assert ("uploaded", "completed", "Source upload accepted (openapi)") in step_states
         assert any(step[0] == "parsed" and step[1] == "completed" for step in step_states)
         assert any(step[0] == "canonicalized" and step[1] == "completed" for step in step_states)
         assert ("generated", "failed", "generation exploded") in step_states

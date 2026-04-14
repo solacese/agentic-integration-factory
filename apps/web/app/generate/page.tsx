@@ -1,23 +1,29 @@
 "use client";
 
-import { useState } from "react";
-import { createRun, uploadSpec } from "@/lib/api";
+import { useEffect, useState } from "react";
+import { createRun, getSourceTypes, uploadSpec } from "@/lib/api";
 
 export default function GeneratePage() {
   const [file, setFile] = useState<File | null>(null);
+  const [sourceType, setSourceType] = useState("openapi");
+  const [sourceTypes, setSourceTypes] = useState<string[]>(["openapi"]);
   const [target, setTarget] = useState<"local_docker" | "ec2_docker_host" | "kubernetes_helm" | "ephemeral_ec2">("ephemeral_ec2");
   const [autoBuild, setAutoBuild] = useState(true);
   const [autoDeploy, setAutoDeploy] = useState(false);
-  const [message, setMessage] = useState<string>("Upload an OpenAPI YAML or JSON file.");
+  const [message, setMessage] = useState<string>("Upload a source file (OpenAPI, JSON Schema, etc.).");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    getSourceTypes().then(setSourceTypes).catch(() => {});
+  }, []);
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!file) return;
     setLoading(true);
-    setMessage("Uploading spec...");
+    setMessage("Uploading source...");
     try {
-      const upload = await uploadSpec(file);
+      const upload = await uploadSpec(file, sourceType);
       setMessage(`Uploaded ${upload.filename}. Creating run...`);
       const run = await createRun({
         uploadId: upload.uploadId,
@@ -37,9 +43,9 @@ export default function GeneratePage() {
     <main className="stack">
       <section className="panel">
         <span className="eyebrow">Upload / Generate</span>
-        <h1 className="page-title">Turn an OpenAPI file into a working integration run.</h1>
+        <h1 className="page-title">Turn a source specification into a working integration run.</h1>
         <p className="lead">
-          The platform will parse the spec, derive canonical topics and event artifacts, generate an MDK-native Java service,
+          The platform will parse the source, derive canonical topics and event artifacts, generate an MDK-native Java service,
           optionally run LiteLLM refinement, and then let you build and deploy it.
         </p>
       </section>
@@ -47,10 +53,18 @@ export default function GeneratePage() {
       <form className="two-column" onSubmit={onSubmit}>
         <section className="panel stack">
           <label className="input">
-            <span>OpenAPI file</span>
+            <span>Source type</span>
+            <select value={sourceType} onChange={(event) => setSourceType(event.target.value)}>
+              {sourceTypes.map((st) => (
+                <option key={st} value={st}>{st.replace(/_/g, " ")}</option>
+              ))}
+            </select>
+          </label>
+          <label className="input">
+            <span>Source file</span>
             <input
               type="file"
-              accept=".yaml,.yml,.json"
+              accept=".yaml,.yml,.json,.schema.json"
               onChange={(event) => setFile(event.target.files?.[0] ?? null)}
             />
           </label>
@@ -85,7 +99,8 @@ export default function GeneratePage() {
             <span className="eyebrow">Suggested inputs</span>
             <div className="pill-list">
               <span className="badge">samples/openapi/stripe-webhook-demo.yaml</span>
-              <span className="badge">samples/openapi/orders-api.yaml</span>
+              <span className="badge">samples/openapi/petstore.yaml</span>
+              <span className="badge">samples/json_schema/order.schema.json</span>
             </div>
           </div>
         </aside>

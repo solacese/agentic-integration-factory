@@ -1,3 +1,10 @@
+export type SourceType =
+  | "openapi"
+  | "json_schema"
+  | "database"
+  | "graphql"
+  | "custom";
+
 export type RunStepName =
   | "uploaded"
   | "parsed"
@@ -70,6 +77,8 @@ export interface OperationSummary {
   eventCandidates: EventCandidate[];
 }
 
+export type IngressType = "rest_controller" | "polling_consumer" | "event_subscriber";
+
 export interface CanonicalModelSummary {
   serviceName: string;
   serviceVersion: string;
@@ -82,6 +91,7 @@ export interface CanonicalModelSummary {
   applicationNames: string[];
   stripeEnabled: boolean;
   testFixtures: TestFixture[];
+  ingressType?: IngressType;
 }
 
 export interface ActiveDeploymentSummary {
@@ -96,6 +106,7 @@ export interface ActiveDeploymentSummary {
 export interface GenerationRunSummary {
   id: string;
   uploadId: string;
+  sourceType: SourceType;
   serviceName: string;
   status: RunStatus;
   deploymentTarget: DeploymentTarget;

@@ -14,16 +14,12 @@ from spec2event.adapters.deploy.kubernetes_helm import KubernetesHelmDeploymentA
 from spec2event.adapters.deploy.local_docker import LocalDockerDeploymentAdapter
 from spec2event.adapters.live.solace_bridge import live_bridge_manager
 from spec2event.adapters.portal.solace_event_portal import SolaceEventPortalAdapter
+from spec2event.adapters.source.registry import get_source_adapter
 from spec2event.config import get_settings
 from spec2event.db import session_scope
 from spec2event.services.aws_service import AwsService
 from spec2event.services.command_runner import run_command
 from spec2event.services.generator_service import generator_service
-from spec2event.services.openapi_service import (
-    canonicalize_openapi,
-    load_openapi_document,
-    summarize_openapi,
-)
 from spec2event.services.run_service import (
     get_run,
     latest_artifacts,
@@ -46,24 +42,29 @@ def generation_pipeline(run_id: str, auto_build: bool = False, auto_deploy: bool
             run = get_run(db, run_id)
             upload = run.upload
             update_run(db, run, status="running", last_message="Starting generation pipeline")
-            log_step(db, run, "uploaded", "completed", "OpenAPI upload accepted")
+            log_step(
+                db, run, "uploaded", "completed", f"Source upload accepted ({run.source_type})"
+            )
             db.commit()
 
             current_step = "parsed"
-            document = load_openapi_document(upload.raw_content)
-            summary = summarize_openapi(document)
+            adapter = get_source_adapter(run.source_type)
+            parse_result = adapter.parse(upload.raw_content)
+            summary_result = adapter.summarize(parse_result.document)
+            summary = summary_result.summary
             upload.summary_json = summary
             log_step(
                 db,
                 run,
                 "parsed",
                 "completed",
-                f"Parsed {summary['operationCount']} operations",
+                f"Parsed source ({run.source_type}): {summary.get('operationCount', 'N/A')} items",
             )
             db.commit()
 
             current_step = "canonicalized"
-            canonical_model = canonicalize_openapi(document)
+            canonical_result = adapter.canonicalize(parse_result.document)
+            canonical_model = canonical_result.canonical_model
             update_run(
                 db,
                 run,

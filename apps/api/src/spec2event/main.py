@@ -4,6 +4,7 @@ import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+import spec2event.adapters.source  # noqa: F401 -- register source adapters
 from spec2event.api.routes import router
 from spec2event.config import get_settings
 
@@ -12,9 +13,9 @@ settings = get_settings()
 structlog.configure(wrapper_class=structlog.make_filtering_bound_logger(settings.log_level.upper()))
 
 app = FastAPI(
-    title="Spec2Event API",
-    version="0.1.0",
-    description="OpenAPI to Solace MDK generation and deployment orchestration API.",
+    title="Integration Factory API",
+    version="0.2.0",
+    description="Multi-source integration generation and deployment orchestration API.",
 )
 
 app.add_middleware(

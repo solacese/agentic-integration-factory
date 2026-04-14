@@ -14,8 +14,8 @@ from spec2event.models import (
     EventPortalSync,
     GeneratedArtifact,
     GenerationRun,
-    OpenApiUpload,
     RunStepLog,
+    SourceUpload,
     TestInvocation,
 )
 
@@ -39,23 +39,30 @@ def iso(dt: datetime) -> str:
 
 
 def create_upload(
-    db: Session, filename: str, content_type: str, raw_content: str, summary: dict[str, Any]
-) -> OpenApiUpload:
-    upload = OpenApiUpload(
+    db: Session,
+    filename: str,
+    content_type: str,
+    raw_content: str,
+    summary: dict[str, Any],
+    source_type: str = "openapi",
+) -> SourceUpload:
+    upload = SourceUpload(
         filename=filename,
         content_type=content_type,
         raw_content=raw_content,
         summary_json=summary,
+        source_type=source_type,
     )
     db.add(upload)
     db.flush()
     return upload
 
 
-def create_run(db: Session, upload: OpenApiUpload, deployment_target: str) -> GenerationRun:
+def create_run(db: Session, upload: SourceUpload, deployment_target: str) -> GenerationRun:
     service_name = upload.summary_json.get("serviceName") or "generated-service"
     run = GenerationRun(
         upload_id=upload.id,
+        source_type=upload.source_type,
         service_name=service_name,
         status="pending",
         deployment_target=deployment_target,
@@ -73,8 +80,8 @@ def get_run(db: Session, run_id: str) -> GenerationRun:
     return run
 
 
-def get_upload(db: Session, upload_id: str) -> OpenApiUpload:
-    upload = db.get(OpenApiUpload, upload_id)
+def get_upload(db: Session, upload_id: str) -> SourceUpload:
+    upload = db.get(SourceUpload, upload_id)
     if upload is None:
         raise HTTPException(status_code=404, detail="Upload not found")
     return upload
@@ -316,6 +323,7 @@ def serialize_run(
     return {
         "id": run.id,
         "upload_id": run.upload_id,
+        "source_type": run.source_type,
         "service_name": run.service_name,
         "status": run.status,
         "deployment_target": run.deployment_target,

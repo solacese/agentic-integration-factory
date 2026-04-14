@@ -17,6 +17,7 @@ class ApiSchema(BaseModel):
 class UploadPreviewResponse(ApiSchema):
     upload_id: str
     filename: str
+    source_type: str = "openapi"
     service_name: str
     summary: dict[str, Any]
 
@@ -52,6 +53,7 @@ class RunStepLogResponse(ApiSchema):
 class RunResponse(ApiSchema):
     id: str
     upload_id: str
+    source_type: str = "openapi"
     service_name: str
     status: str
     deployment_target: str
