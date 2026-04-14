@@ -1,16 +1,16 @@
 # PostgreSQL Demo Source Notes
 
-These notes document the validated database source used by the prepared PostgreSQL and hybrid demo bundles.
+These notes document the validated database source shape used by the prepared PostgreSQL and hybrid demo bundles.
 
 ## Connection
 
-- database: `defaultdb`
-- host: `your-postgres-host`
-- port: `28975`
-- user: `your-db-user`
-- ssl mode: `require`
+Configure these values in your `.env` under the `SOURCE_DATABASE_*` variables:
 
-Connectivity was verified successfully on `2026-03-19`.
+- database: your target database name
+- host: your PostgreSQL host
+- port: your PostgreSQL port (typically `5432` or `28975` for managed services)
+- user: your database user
+- ssl mode: `require` (recommended for cloud-hosted databases)
 
 ## Visible Non-System Tables
 
@@ -46,7 +46,7 @@ Why:
 
 ## Recommended Ingestion Strategy
 
-For the simplest credible filmed story:
+For the simplest credible demo:
 
 - start with a read-only approach
 - prefer initial snapshot plus incremental polling on `updated_at`
