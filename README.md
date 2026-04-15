@@ -14,7 +14,7 @@ It turns **any source** — OpenAPI specs, JSON Schemas, database credentials, o
 ## Key Capabilities
 
 - **Source-agnostic ingestion** — pluggable source adapters handle parsing, summarization, and canonicalization for each input type
-- **Real Solace MDK output** — generated projects use the `micro-integration-build-parent`, pre-created bindings, workflow routing, and `BindingCapabilitiesFactory` beans (based on `solace-mdk-samples-main`)
+- **Real Solace MDK output** — generated projects use the `micro-integration-build-parent`, pre-created bindings, workflow routing, and `BindingCapabilitiesFactory` beans (based on Solace MDK Samples)
 - **Multiple ingress patterns** — REST controllers, polling consumers, or event subscribers depending on the source type
 - **Full lifecycle** — generation, build, deploy, test, Event Portal sync, and AI refinement in one pipeline
 - **Agent-native** — comes with a skill definition and lifecycle runbook for autonomous operation
@@ -122,7 +122,7 @@ The helper script copies one of those env bundles into the active root `.env`.
 - [templates](templates)
   — Solace MDK and Helm generation templates
 - [mdk-reference](mdk-reference)
-  — local MDK baseline (from solace-mdk-samples-main)
+  — local MDK baseline (from Solace MDK Samples)
 - [samples](samples)
   — bundled source inputs (OpenAPI, JSON Schema)
 - [references](references)

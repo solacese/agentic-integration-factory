@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"com.solace.connector.core.io.header"},{"l":"com.solace.connector.core.io.health"},{"l":"com.solace.connector.core.io.outbound"},{"l":"com.solace.connector.core.io.provider"}];updateSearchResults();
