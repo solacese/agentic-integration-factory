@@ -98,9 +98,9 @@ export default function GeneratePage() {
           <div className="card">
             <span className="eyebrow">Suggested inputs</span>
             <div className="pill-list">
-              <span className="badge">samples/openapi/stripe-webhook-demo.yaml</span>
-              <span className="badge">samples/openapi/petstore.yaml</span>
-              <span className="badge">samples/json_schema/order.schema.json</span>
+              <span className="badge">stripe-webhook-demo.yaml</span>
+              <span className="badge">petstore.yaml</span>
+              <span className="badge">order.schema.json</span>
             </div>
           </div>
         </aside>

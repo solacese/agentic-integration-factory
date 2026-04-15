@@ -17,5 +17,5 @@ __pycache__
 .mypy_cache
 *.pyc
 apps/api/.venv
-generated-runs/*
-!generated-runs/.gitkeep
+apps/api/generated-runs/*
+!apps/api/generated-runs/.gitkeep

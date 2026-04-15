@@ -10,6 +10,7 @@ from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
+API_ROOT = Path(__file__).resolve().parents[2]
 
 
 def _normalized_fernet_key(raw: str) -> str:
@@ -42,9 +43,9 @@ class Settings(BaseSettings):
     demo_admin_password: str = "changeme"
     allow_insecure_local_login: bool = True
     repo_root: Path = REPO_ROOT
-    templates_root: Path = REPO_ROOT / "templates"
-    runs_root: Path = REPO_ROOT / "generated-runs"
-    mdk_sample_root: Path = REPO_ROOT / "mdk-reference" / "micro-integration"
+    templates_root: Path = API_ROOT / "resources" / "templates"
+    runs_root: Path = API_ROOT / "generated-runs"
+    mdk_sample_root: Path = API_ROOT / "resources" / "mdk-reference" / "micro-integration"
     source_mode: str = "openapi"
     enable_rq: bool = False
     log_level: str = "INFO"

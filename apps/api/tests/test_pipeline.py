@@ -26,8 +26,8 @@ from spec2event.services.run_service import (
     update_run,
 )
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
-STRIPE_SPEC = REPO_ROOT / "samples" / "openapi" / "stripe-webhook-demo.yaml"
+API_ROOT = Path(__file__).resolve().parents[1]
+STRIPE_SPEC = API_ROOT / "resources" / "samples" / "openapi" / "stripe-webhook-demo.yaml"
 
 
 def test_generation_pipeline_persists_failure_progress(monkeypatch, tmp_path: Path) -> None:

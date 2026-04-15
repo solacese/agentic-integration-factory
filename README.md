@@ -105,9 +105,9 @@ The helper script copies one of those env bundles into the active root `.env`.
 
 ## Sample Inputs
 
-- [samples/openapi/petstore.yaml](samples/openapi/petstore.yaml) — simple Petstore API
-- [samples/openapi/stripe-webhook-demo.yaml](samples/openapi/stripe-webhook-demo.yaml) — Stripe webhook integration
-- [samples/json_schema/order.schema.json](samples/json_schema/order.schema.json) — e-commerce order schema
+- [petstore.yaml](apps/api/resources/samples/openapi/petstore.yaml) — simple Petstore API
+- [stripe-webhook-demo.yaml](apps/api/resources/samples/openapi/stripe-webhook-demo.yaml) — Stripe webhook integration
+- [order.schema.json](apps/api/resources/samples/json_schema/order.schema.json) — e-commerce order schema
 
 ## Main Folders
 
@@ -119,14 +119,12 @@ The helper script copies one of those env bundles into the active root `.env`.
   — FastAPI orchestrator, source adapters, and deployment adapters
 - [apps/web](apps/web)
   — Next.js UI with source type selector
-- [templates](templates)
+- [apps/api/resources/templates](apps/api/resources/templates)
   — Solace MDK and Helm generation templates
-- [mdk-reference](mdk-reference)
+- [apps/api/resources/mdk-reference](apps/api/resources/mdk-reference)
   — local MDK baseline (from Solace MDK Samples)
-- [samples](samples)
+- [apps/api/resources/samples](apps/api/resources/samples)
   — bundled source inputs (OpenAPI, JSON Schema)
-- [references](references)
-  — deeper design and Event Portal guidance
 
 ## Architecture
 
@@ -159,7 +157,7 @@ Use this repository as your skill and execution guide.
 
 Read SKILL.md first, then create_micro_integrations.md.
 Use the active .env file in the repo as the configuration contract.
-Prefer the bundled implementation in apps/, templates/, and infra/ instead of rebuilding the control plane from scratch.
+Prefer the bundled implementation in apps/ and infra/ instead of rebuilding the control plane from scratch.
 
 Take over the micro-integration lifecycle:
 - discover the source
@@ -176,6 +174,5 @@ The run is only complete when runtime, governance, and documentation are all in 
 ## Notes
 
 - Use [.env.example](.env.example) as the base config template.
-- Use [samples/openapi/petstore.yaml](samples/openapi/petstore.yaml) for the simplest API-first demo.
-- Use [samples/json_schema/order.schema.json](samples/json_schema/order.schema.json) for a schema-first demo.
-- Use [references/postgres_demo_source_notes.md](references/postgres_demo_source_notes.md) for the validated PostgreSQL source shape.
+- Use [petstore.yaml](apps/api/resources/samples/openapi/petstore.yaml) for the simplest API-first demo.
+- Use [order.schema.json](apps/api/resources/samples/json_schema/order.schema.json) for a schema-first demo.

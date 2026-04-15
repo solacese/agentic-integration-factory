@@ -16,8 +16,8 @@ from spec2event.services.openapi_service import (
     summarize_openapi,
 )
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
-STRIPE_SPEC = REPO_ROOT / "samples" / "openapi" / "stripe-webhook-demo.yaml"
+API_ROOT = Path(__file__).resolve().parents[1]
+STRIPE_SPEC = API_ROOT / "resources" / "samples" / "openapi" / "stripe-webhook-demo.yaml"
 
 
 def _stripe_model() -> tuple[dict, dict, str]:

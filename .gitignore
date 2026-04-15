@@ -39,5 +39,5 @@ packages/shared/node_modules/
 coverage/
 
 # Generated output
-generated-runs/*
-!generated-runs/.gitkeep
+apps/api/generated-runs/*
+!apps/api/generated-runs/.gitkeep

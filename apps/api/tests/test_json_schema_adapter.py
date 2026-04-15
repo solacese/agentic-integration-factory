@@ -7,8 +7,8 @@ import pytest
 
 from spec2event.adapters.source.json_schema_adapter import JsonSchemaSourceAdapter
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
-ORDER_SCHEMA = REPO_ROOT / "samples" / "json_schema" / "order.schema.json"
+API_ROOT = Path(__file__).resolve().parents[1]
+ORDER_SCHEMA = API_ROOT / "resources" / "samples" / "json_schema" / "order.schema.json"
 
 
 def test_parse_json_schema() -> None:
