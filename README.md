@@ -111,10 +111,12 @@ The helper script copies one of those env bundles into the active root `.env`.
 
 ## Main Folders
 
-- [SKILL.md](SKILL.md)
+- [SKILL.md](docs/agent/SKILL.md)
   — agent entry point
-- [create_micro_integrations.md](create_micro_integrations.md)
+- [create_micro_integrations.md](docs/agent/create_micro_integrations.md)
   — lifecycle runbook
+- [docs/agent/references](docs/agent/references)
+  — deeper design and Event Portal guidance
 - [apps/api](apps/api)
   — FastAPI orchestrator, source adapters, and deployment adapters
 - [apps/web](apps/web)
@@ -155,7 +157,7 @@ Event Portal Sync  ─── domains, apps, schemas, events
 ```text
 Use this repository as your skill and execution guide.
 
-Read SKILL.md first, then create_micro_integrations.md.
+Read docs/agent/SKILL.md first, then docs/agent/create_micro_integrations.md.
 Use the active .env file in the repo as the configuration contract.
 Prefer the bundled implementation in apps/ and infra/ instead of rebuilding the control plane from scratch.
 

@@ -14,14 +14,14 @@ Use this prompt when you want to film the stronger hybrid version of the factory
 
 This hybrid demo uses:
 
-- OpenAPI contract: `samples/openapi/petstore.yaml`
+- OpenAPI contract: `apps/api/resources/samples/openapi/petstore.yaml`
 - PostgreSQL database: `defaultdb`
 - schema: `public`
 - best database table for the filmed story: `products`
 
 Reference notes:
 
-- `references/postgres_demo_source_notes.md`
+- `docs/agent/references/postgres_demo_source_notes.md`
 
 The goal is not to mash unlike sources together blindly.
 The goal is to show that different source technologies can feed one coherent event-driven architecture.
@@ -31,13 +31,13 @@ The goal is to show that different source technologies can feed one coherent eve
 ```text
 Use this repository as your skill and execution guide.
 
-Read SKILL.md first, then create_micro_integrations.md.
-Activate `demo/env/hybrid.env` into the root `.env`, then use the active `.env` in this repo as the runtime and infrastructure configuration contract.
+Read docs/agent/SKILL.md first, then docs/agent/create_micro_integrations.md.
+Activate `infra/demo/env/hybrid.env` into the root `.env`, then use the active `.env` in this repo as the runtime and infrastructure configuration contract.
 
 For this run, keep the path simple and demo-friendly:
 - source mode: multi
 - source types: OpenAPI plus PostgreSQL
-- OpenAPI contract: samples/openapi/petstore.yaml
+- OpenAPI contract: apps/api/resources/samples/openapi/petstore.yaml
 - database: defaultdb
 - schema: public
 - preferred database source table: products

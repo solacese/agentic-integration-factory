@@ -10,19 +10,19 @@ Use this prompt when you want to film the simplest compelling version of the fac
 
 Bundled local contract:
 
-- `samples/openapi/petstore.yaml`
+- `apps/api/resources/samples/openapi/petstore.yaml`
 
 ## Prompt
 
 ```text
 Use this repository as your skill and execution guide.
 
-Read SKILL.md first, then create_micro_integrations.md.
-Activate `demo/env/openapi.env` into the root `.env`, then use the active `.env` in this repo as the runtime and infrastructure configuration contract.
+Read docs/agent/SKILL.md first, then docs/agent/create_micro_integrations.md.
+Activate `infra/demo/env/openapi.env` into the root `.env`, then use the active `.env` in this repo as the runtime and infrastructure configuration contract.
 
 For this run, keep the path simple and demo-friendly:
 - source mode: OpenAPI
-- source file: samples/openapi/petstore.yaml
+- source file: apps/api/resources/samples/openapi/petstore.yaml
 - deployment target: EC2
 - event transport: Solace PubSub+
 - governance target: Solace Event Portal

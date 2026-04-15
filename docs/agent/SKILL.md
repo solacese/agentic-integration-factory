@@ -10,8 +10,8 @@ Use this skill when the user wants an agent to own the micro-integration lifecyc
 ## First Moves
 
 1. Read [create_micro_integrations.md](create_micro_integrations.md).
-2. Use [.env.example](.env.example) as the base configuration contract.
-3. If `apps/`, `templates/`, and `infra/` are present in this repo, treat them as the primary runnable factory implementation and adapt them before creating anything from scratch.
+2. Use [.env.example](../../.env.example) as the base configuration contract.
+3. If `apps/` and `infra/` are present in this repo, treat them as the primary runnable factory implementation and adapt them before creating anything from scratch.
 4. Load only the references needed for the current source and target:
    - Source discovery: [references/source_discovery.md](references/source_discovery.md)
    - Source adapter matrix: [references/source_adapter_matrix.md](references/source_adapter_matrix.md)
@@ -24,10 +24,9 @@ Use this skill when the user wants an agent to own the micro-integration lifecyc
 
 When this repository includes:
 
-- `apps/api`
+- `apps/api` (includes `resources/templates/`, `resources/samples/`, `resources/mdk-reference/`)
 - `apps/web`
 - `packages/shared`
-- `templates/`
 - `infra/docker`
 
 you should use that bundled implementation as the default execution path for the factory itself.
@@ -37,9 +36,9 @@ Only generate new micro-integrations for source-specific runtimes, not a second 
 
 Prepared demo bundles live under:
 
-- `demo/env/`
-- `demo/prompts/`
-- `samples/`
+- `infra/demo/env/`
+- `infra/demo/prompts/`
+- `apps/api/resources/samples/`
 
 If one of those demo bundles is being used, activate it into the root `.env` first or treat the active `.env` as authoritative.
 

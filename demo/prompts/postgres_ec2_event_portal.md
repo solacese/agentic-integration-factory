@@ -14,7 +14,7 @@ This database was validated on 2026-03-19.
 
 Reference notes:
 
-- `references/postgres_demo_source_notes.md`
+- `docs/agent/references/postgres_demo_source_notes.md`
 
 Useful shape for the demo:
 
@@ -45,8 +45,8 @@ Tables that look less useful for the film:
 ```text
 Use this repository as your skill and execution guide.
 
-Read SKILL.md first, then create_micro_integrations.md.
-Activate `demo/env/postgres.env` into the root `.env`, then use the active `.env` in this repo as the runtime and infrastructure configuration contract.
+Read docs/agent/SKILL.md first, then docs/agent/create_micro_integrations.md.
+Activate `infra/demo/env/postgres.env` into the root `.env`, then use the active `.env` in this repo as the runtime and infrastructure configuration contract.
 
 For this run, keep the path simple and demo-friendly:
 - source mode: PostgreSQL
