@@ -13,9 +13,9 @@
     "build:web": "npm --workspace @spec2event/web run build",
     "lint:web": "npm --workspace @spec2event/web run lint",
     "typecheck:web": "npm --workspace @spec2event/web run typecheck",
-    "demo:openapi": "./scripts/use_demo_env.sh openapi",
-    "demo:postgres": "./scripts/use_demo_env.sh postgres",
-    "demo:hybrid": "./scripts/use_demo_env.sh hybrid"
+    "demo:openapi": "./infra/scripts/use_demo_env.sh openapi",
+    "demo:postgres": "./infra/scripts/use_demo_env.sh postgres",
+    "demo:hybrid": "./infra/scripts/use_demo_env.sh hybrid"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",

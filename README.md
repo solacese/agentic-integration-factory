@@ -36,9 +36,9 @@ Adding a new source type requires implementing three methods (`parse`, `summariz
 1. Pick a demo mode:
 
 ```bash
-./scripts/use_demo_env.sh openapi
-./scripts/use_demo_env.sh postgres
-./scripts/use_demo_env.sh hybrid
+./infra/scripts/use_demo_env.sh openapi
+./infra/scripts/use_demo_env.sh postgres
+./infra/scripts/use_demo_env.sh hybrid
 ```
 
 2. Bootstrap the repo:
@@ -92,14 +92,14 @@ workspace/
 
 ## Demo Bundles
 
-All prepared demo inputs live in [demo](demo):
+All prepared demo inputs live in [infra/demo](infra/demo):
 
-- OpenAPI demo env: [demo/env/openapi.env](demo/env/openapi.env)
-- PostgreSQL demo env: [demo/env/postgres.env](demo/env/postgres.env)
-- Hybrid demo env: [demo/env/hybrid.env](demo/env/hybrid.env)
-- OpenAPI prompt: [demo/prompts/openapi_ec2_event_portal.md](demo/prompts/openapi_ec2_event_portal.md)
-- PostgreSQL prompt: [demo/prompts/postgres_ec2_event_portal.md](demo/prompts/postgres_ec2_event_portal.md)
-- Hybrid prompt: [demo/prompts/openapi_postgres_ec2_event_portal.md](demo/prompts/openapi_postgres_ec2_event_portal.md)
+- OpenAPI demo env: [infra/demo/env/openapi.env](infra/demo/env/openapi.env)
+- PostgreSQL demo env: [infra/demo/env/postgres.env](infra/demo/env/postgres.env)
+- Hybrid demo env: [infra/demo/env/hybrid.env](infra/demo/env/hybrid.env)
+- OpenAPI prompt: [infra/demo/prompts/openapi_ec2_event_portal.md](infra/demo/prompts/openapi_ec2_event_portal.md)
+- PostgreSQL prompt: [infra/demo/prompts/postgres_ec2_event_portal.md](infra/demo/prompts/postgres_ec2_event_portal.md)
+- Hybrid prompt: [infra/demo/prompts/openapi_postgres_ec2_event_portal.md](infra/demo/prompts/openapi_postgres_ec2_event_portal.md)
 
 The helper script copies one of those env bundles into the active root `.env`.
 

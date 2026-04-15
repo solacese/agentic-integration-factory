@@ -19,16 +19,16 @@ install-web: ## Install web dependencies
 	npm install
 
 use-demo-openapi: ## Set up OpenAPI demo environment
-	./scripts/use_demo_env.sh openapi
+	./infra/scripts/use_demo_env.sh openapi
 
 use-demo-postgres: ## Set up PostgreSQL demo environment
-	./scripts/use_demo_env.sh postgres
+	./infra/scripts/use_demo_env.sh postgres
 
 use-demo-hybrid: ## Set up hybrid demo environment
-	./scripts/use_demo_env.sh hybrid
+	./infra/scripts/use_demo_env.sh hybrid
 
 preflight: ## Validate environment configuration
-	cd apps/api && uv run python ../../scripts/preflight.py --env-file ../../.env
+	cd apps/api && uv run python ../../infra/scripts/preflight.py --env-file ../../.env
 
 bootstrap: ## Bootstrap the entire project (install + compose + migrate)
 	make install
