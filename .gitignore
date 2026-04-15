@@ -11,7 +11,7 @@
 
 # Build artifacts
 dist/
-build/
+/build/
 target/
 *.class
 *.jar
