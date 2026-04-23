@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive Demo — Agentic Integration Factory</title>
+<meta name="description" content="Design event-driven micro-integrations on Solace PubSub+ with an AI advisor. Describe your scenario and get a complete architecture proposal.">
+<style>
+/* ── Reset & Base ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0e17;--bg2:#111827;--bg3:#1a2235;--bg4:#243049;
+  --green:#00c895;--green-dim:#00c89540;--green-glow:#00c89520;
+  --blue:#3b82f6;--amber:#f59e0b;--red:#ef4444;--purple:#a855f7;
+  --text:#e2e8f0;--text-dim:#94a3b8;--text-muted:#64748b;
+  --border:#1e293b;--border-light:#334155;
+  --radius:12px;--radius-sm:8px;
+  --font-mono:'SF Mono','Fira Code','JetBrains Mono',Consolas,monospace;
+  --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{
+  background:var(--bg);color:var(--text);font-family:var(--font-sans);
+  line-height:1.6;min-height:100vh;overflow-x:hidden;
+}
+a{color:var(--green);text-decoration:none;transition:opacity .2s}
+a:hover{opacity:.8}
+
+/* ── Background Grid ── */
+body::before{
+  content:'';position:fixed;inset:0;z-index:-1;
+  background-image:
+    linear-gradient(var(--border)1px,transparent 1px),
+    linear-gradient(90deg,var(--border)1px,transparent 1px);
+  background-size:60px 60px;opacity:.15;
+}
+
+/* ── Container ── */
+.container{max-width:1200px;margin:0 auto;padding:0 24px}
+
+/* ── Navigation ── */
+nav{
+  position:sticky;top:0;z-index:100;
+  background:var(--bg)ee;backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);padding:16px 0;
+}
+nav .container{display:flex;align-items:center;justify-content:space-between}
+.nav-brand{display:flex;align-items:center;gap:12px;font-weight:700;font-size:1.1rem;color:var(--text);text-decoration:none}
+.nav-brand:hover{opacity:1;color:var(--text)}
+.nav-brand svg{width:28px;height:28px}
+.nav-links{display:flex;gap:24px;list-style:none;align-items:center}
+.nav-links a{color:var(--text-dim);font-size:.875rem;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:var(--green);opacity:1}
+@media(max-width:768px){.nav-links{display:none}}
+
+/* ── Hero ── */
+.hero{padding:100px 0 80px;text-align:center;position:relative}
+.hero::after{
+  content:'';position:absolute;top:50%;left:50%;
+  width:600px;height:600px;transform:translate(-50%,-50%);
+  background:radial-gradient(circle,var(--green-glow),transparent 70%);
+  pointer-events:none;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--green-dim);color:var(--green);
+  padding:6px 16px;border-radius:20px;font-size:.8rem;font-weight:600;
+  margin-bottom:24px;letter-spacing:.5px;text-transform:uppercase;
+}
+.hero-badge .pulse{
+  width:8px;height:8px;border-radius:50%;background:var(--green);
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+.hero h1{
+  font-family:var(--font-mono);font-size:clamp(2.5rem,6vw,4.5rem);
+  font-weight:800;line-height:1.1;margin-bottom:20px;
+  background:linear-gradient(135deg,#fff 30%,var(--green));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hero p{font-size:1.2rem;color:var(--text-dim);max-width:640px;margin:0 auto 36px}
+.hero-cta{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;padding:12px 28px;
+  border-radius:var(--radius-sm);font-weight:600;font-size:.95rem;
+  transition:all .2s;cursor:pointer;border:none;text-decoration:none;
+}
+.btn-primary{background:var(--green);color:#000}
+.btn-primary:hover{background:#00dba3;transform:translateY(-1px);box-shadow:0 4px 20px var(--green-dim);opacity:1}
+.btn-secondary{background:var(--bg3);color:var(--text);border:1px solid var(--border-light)}
+.btn-secondary:hover{background:var(--bg4);border-color:var(--green);opacity:1}
+
+/* ── Section Layout ── */
+section{padding:80px 0}
+.section-label{
+  font-family:var(--font-mono);font-size:.75rem;color:var(--green);
+  text-transform:uppercase;letter-spacing:2px;margin-bottom:12px;
+}
+.section-title{font-size:2rem;font-weight:700;margin-bottom:12px}
+.section-desc{color:var(--text-dim);max-width:600px;margin-bottom:48px}
+
+/* ── Example Cards ── */
+.examples-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:20px;
+}
+@media(max-width:900px){.examples-grid{grid-template-columns:1fr}}
+.example-card{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+  padding:28px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;
+}
+.example-card:hover{
+  border-color:var(--green);box-shadow:0 0 30px var(--green-glow);
+  transform:translateY(-2px);
+}
+.example-card:focus-visible{
+  outline:2px solid var(--green);outline-offset:2px;
+}
+.example-card::after{
+  content:'Try this \2192';position:absolute;bottom:16px;right:20px;
+  font-size:.75rem;font-weight:600;color:var(--green);
+  opacity:0;transform:translateX(-8px);transition:all .3s;
+}
+.example-card:hover::after{opacity:1;transform:translateX(0)}
+.example-icon{
+  width:48px;height:48px;border-radius:12px;display:flex;
+  align-items:center;justify-content:center;margin-bottom:16px;font-size:1.4rem;
+}
+.example-icon.green{background:var(--green-dim);color:var(--green)}
+.example-icon.blue{background:#3b82f620;color:var(--blue)}
+.example-icon.purple{background:#a855f720;color:var(--purple)}
+.example-card h3{font-size:1.1rem;font-weight:600;margin-bottom:8px}
+.example-card p{color:var(--text-dim);font-size:.9rem;line-height:1.6;padding-bottom:12px}
+
+/* ── Chat Section ── */
+.chat-section{padding:60px 0 100px}
+.chat-container{
+  max-width:900px;margin:0 auto;
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+  overflow:hidden;display:flex;flex-direction:column;
+  box-shadow:0 0 60px var(--green-glow),0 4px 40px rgba(0,0,0,.4);
+}
+.chat-header{
+  padding:16px 24px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;
+  background:var(--bg3);
+}
+.chat-header-dot{
+  width:10px;height:10px;border-radius:50%;background:var(--green);
+  animation:pulse 2s ease-in-out infinite;
+}
+.chat-header-title{font-weight:600;font-size:.95rem}
+.chat-header-subtitle{font-size:.8rem;color:var(--text-muted);margin-left:auto}
+.chat-messages{
+  min-height:500px;max-height:600px;overflow-y:auto;padding:24px;
+  display:flex;flex-direction:column;gap:16px;
+  scroll-behavior:smooth;
+}
+.chat-messages::-webkit-scrollbar{width:6px}
+.chat-messages::-webkit-scrollbar-track{background:transparent}
+.chat-messages::-webkit-scrollbar-thumb{background:var(--border-light);border-radius:3px}
+.chat-messages::-webkit-scrollbar-thumb:hover{background:var(--text-muted)}
+
+/* ── Message Bubbles ── */
+.message{
+  display:flex;gap:12px;max-width:85%;
+  animation:messageIn .3s ease-out;
+}
+@keyframes messageIn{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.message-user{align-self:flex-end;flex-direction:row-reverse}
+.message-assistant{align-self:flex-start}
+
+.message-avatar{
+  width:32px;height:32px;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  margin-top:2px;
+}
+.message-user .message-avatar{
+  background:var(--green-dim);color:var(--green);font-size:.85rem;font-weight:700;
+}
+.message-assistant .message-avatar{
+  background:var(--bg3);border:1px solid var(--border-light);
+}
+.message-assistant .message-avatar svg{width:18px;height:18px}
+
+.message-bubble{
+  border-radius:var(--radius);padding:14px 18px;
+  font-size:.925rem;line-height:1.65;
+  word-break:break-word;
+}
+.message-user .message-bubble{
+  background:var(--green);color:#000;
+  border-bottom-right-radius:4px;
+}
+.message-assistant .message-bubble{
+  background:var(--bg3);border:1px solid var(--border);color:var(--text);
+  border-bottom-left-radius:4px;
+}
+
+/* ── Markdown Rendering in Messages ── */
+.message-assistant .message-bubble h1,
+.message-assistant .message-bubble h2,
+.message-assistant .message-bubble h3,
+.message-assistant .message-bubble h4,
+.message-assistant .message-bubble h5,
+.message-assistant .message-bubble h6{
+  font-family:var(--font-mono);color:var(--green);margin:18px 0 8px;font-size:1rem;
+}
+.message-assistant .message-bubble h1:first-child,
+.message-assistant .message-bubble h2:first-child,
+.message-assistant .message-bubble h3:first-child{margin-top:0}
+.message-assistant .message-bubble h1{font-size:1.15rem}
+.message-assistant .message-bubble h2{font-size:1.05rem}
+
+.message-assistant .message-bubble p{margin:8px 0}
+.message-assistant .message-bubble p:first-child{margin-top:0}
+.message-assistant .message-bubble p:last-child{margin-bottom:0}
+
+.message-assistant .message-bubble code{
+  font-family:var(--font-mono);background:var(--bg);
+  padding:2px 6px;border-radius:4px;font-size:.85rem;color:var(--green);
+}
+.message-assistant .message-bubble pre{
+  background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:14px 16px;overflow-x:auto;margin:12px 0;
+  font-family:var(--font-mono);font-size:.82rem;line-height:1.7;color:var(--text-dim);
+}
+.message-assistant .message-bubble pre code{
+  background:none;padding:0;border-radius:0;color:inherit;font-size:inherit;
+}
+.message-assistant .message-bubble strong{color:#fff;font-weight:600}
+.message-assistant .message-bubble em{color:var(--text-dim);font-style:italic}
+.message-assistant .message-bubble ul,
+.message-assistant .message-bubble ol{
+  padding-left:20px;margin:8px 0;
+}
+.message-assistant .message-bubble li{margin:4px 0;color:var(--text-dim)}
+.message-assistant .message-bubble li strong{color:var(--text)}
+.message-assistant .message-bubble a{color:var(--green);text-decoration:underline;text-underline-offset:2px}
+.message-assistant .message-bubble hr{
+  border:none;border-top:1px solid var(--border);margin:16px 0;
+}
+.message-assistant .message-bubble blockquote{
+  border-left:3px solid var(--green);padding-left:12px;margin:8px 0;color:var(--text-dim);
+}
+
+/* ── Loading Dots ── */
+.loading-dots{display:flex;gap:4px;padding:8px 0}
+.loading-dots span{
+  width:8px;height:8px;border-radius:50%;background:var(--text-muted);
+  animation:dotBounce 1.4s ease-in-out infinite;
+}
+.loading-dots span:nth-child(2){animation-delay:.2s}
+.loading-dots span:nth-child(3){animation-delay:.4s}
+@keyframes dotBounce{
+  0%,80%,100%{opacity:.3;transform:scale(.8)}
+  40%{opacity:1;transform:scale(1)}
+}
+
+/* ── Error Message ── */
+.message-error{
+  background:var(--bg3);border:1px solid #ef444440;border-radius:var(--radius);
+  padding:14px 18px;display:flex;align-items:center;gap:12px;
+  animation:messageIn .3s ease-out;align-self:flex-start;max-width:85%;
+}
+.message-error-icon{color:var(--red);font-size:1.2rem;flex-shrink:0}
+.message-error-text{font-size:.9rem;color:var(--text-dim)}
+.message-error-retry{
+  background:var(--bg4);color:var(--text);border:1px solid var(--border-light);
+  padding:6px 14px;border-radius:var(--radius-sm);font-size:.8rem;font-weight:600;
+  cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;
+}
+.message-error-retry:hover{border-color:var(--green);color:var(--green)}
+
+/* ── Rate Limit Toast ── */
+.rate-limit-toast{
+  position:fixed;bottom:120px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--bg4);border:1px solid var(--border-light);
+  padding:10px 20px;border-radius:var(--radius-sm);
+  font-size:.85rem;color:var(--text-dim);
+  opacity:0;transition:all .3s;pointer-events:none;z-index:200;
+}
+.rate-limit-toast.visible{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── Chat Input ── */
+.chat-input-area{
+  padding:16px 24px 20px;border-top:1px solid var(--border);
+  background:var(--bg2);
+}
+.chat-input-wrapper{
+  display:flex;gap:12px;align-items:flex-end;
+}
+.chat-input{
+  flex:1;background:var(--bg);border:1px solid var(--border-light);
+  border-radius:var(--radius-sm);padding:12px 16px;
+  color:var(--text);font-family:var(--font-sans);font-size:.925rem;
+  resize:none;outline:none;transition:border-color .2s;
+  line-height:1.5;min-height:46px;max-height:160px;
+  overflow-y:auto;
+}
+.chat-input:focus{border-color:var(--green)}
+.chat-input::placeholder{color:var(--text-muted)}
+.chat-input:disabled{opacity:.5;cursor:not-allowed}
+.chat-send{
+  width:46px;height:46px;border-radius:var(--radius-sm);
+  background:var(--green);color:#000;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;flex-shrink:0;
+}
+.chat-send:hover:not(:disabled){background:#00dba3;transform:translateY(-1px);box-shadow:0 4px 16px var(--green-dim)}
+.chat-send:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.chat-send svg{width:20px;height:20px}
+
+/* ── Welcome Message ── */
+.chat-welcome{
+  text-align:center;padding:40px 20px;color:var(--text-muted);
+}
+.chat-welcome-icon{
+  width:56px;height:56px;margin:0 auto 16px;border-radius:14px;
+  background:var(--green-dim);display:flex;align-items:center;justify-content:center;
+}
+.chat-welcome-icon svg{width:28px;height:28px}
+.chat-welcome h3{color:var(--text);font-size:1.1rem;margin-bottom:8px}
+.chat-welcome p{font-size:.9rem;max-width:400px;margin:0 auto}
+
+/* ── How It Works ── */
+.how-section{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.how-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:32px;
+  counter-reset:steps;
+}
+@media(max-width:768px){.how-grid{grid-template-columns:1fr;gap:24px}}
+.how-step{text-align:center;position:relative}
+.how-step-number{
+  width:56px;height:56px;border-radius:50%;
+  background:var(--bg);border:2px solid var(--border-light);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 20px;font-family:var(--font-mono);
+  font-size:1.2rem;font-weight:700;color:var(--green);
+  transition:all .3s;
+}
+.how-step:hover .how-step-number{
+  border-color:var(--green);background:var(--green-dim);
+  box-shadow:0 0 24px var(--green-dim);
+}
+.how-step h3{font-size:1.1rem;font-weight:600;margin-bottom:8px}
+.how-step p{color:var(--text-dim);font-size:.9rem;line-height:1.6;max-width:320px;margin:0 auto}
+
+/* ── Connector Lines Between Steps ── */
+@media(min-width:769px){
+  .how-step:not(:last-child)::after{
+    content:'';position:absolute;top:28px;right:-16px;width:32px;height:2px;
+    background:linear-gradient(90deg,var(--green),var(--green-dim));
+  }
+}
+
+/* ── Footer ── */
+footer{
+  border-top:1px solid var(--border);padding:40px 0;text-align:center;
+  color:var(--text-muted);font-size:.85rem;
+}
+footer a{color:var(--green)}
+.footer-links{display:flex;gap:24px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+
+/* ── Glow Line ── */
+.glow-line{
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--green),transparent);
+  margin:0 auto;max-width:400px;
+}
+
+/* ── Responsive ── */
+@media(max-width:600px){
+  .hero{padding:60px 0 50px}
+  .hero h1{font-size:2rem}
+  .hero p{font-size:1rem}
+  .chat-messages{min-height:400px;max-height:500px;padding:16px}
+  .chat-input-area{padding:12px 16px 16px}
+  .message{max-width:95%}
+  section{padding:60px 0}
+}
+</style>
+</head>
+<body>
+
+<!-- ── Navigation ── -->
+<nav>
+  <div class="container">
+    <a href="index.html" class="nav-brand" aria-label="Agentic Integration Factory home">
+      <svg viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect width="28" height="28" rx="6" fill="#00c895" fill-opacity=".15"/><path d="M8 14h4l2-4 2 8 2-4h4" stroke="#00c895" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Agentic Integration Factory
+    </a>
+    <ul class="nav-links">
+      <li><a href="#chat">Try It</a></li>
+      <li><a href="#how-it-works">How It Works</a></li>
+      <li><a href="https://github.com/solacese/agentic-integration-factory" target="_blank" rel="noopener">GitHub</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge"><span class="pulse" aria-hidden="true"></span> Interactive Demo</div>
+    <h1>Design Your<br>Integration</h1>
+    <p>Describe what you want your micro-integration to do. Our AI advisor will propose the event architecture, topics, schemas, and deployment strategy &mdash; all built on Solace PubSub+.</p>
+    <div class="hero-cta">
+      <a href="#chat" class="btn btn-primary">Start Designing</a>
+      <a href="index.html" class="btn btn-secondary">View Full Reference</a>
+    </div>
+  </div>
+</section>
+
+<div class="container"><div class="glow-line"></div></div>
+
+<!-- ── Example Cards ── -->
+<section id="examples">
+  <div class="container">
+    <div class="section-label">Quick Start</div>
+    <h2 class="section-title">Example Scenarios</h2>
+    <p class="section-desc">Click any card to pre-fill the chat and get an architecture proposal instantly.</p>
+    <div class="examples-grid">
+      <div class="example-card" tabindex="0" role="button" aria-label="Try Stripe Webhook Ingestion example" data-prompt="Receive Stripe payment webhooks and publish payment events to Solace for downstream processing">
+        <div class="example-icon green" aria-hidden="true">&#128179;</div>
+        <h3>Stripe Webhook Ingestion</h3>
+        <p>Receive Stripe payment webhooks and publish payment events to Solace for downstream processing</p>
+      </div>
+      <div class="example-card" tabindex="0" role="button" aria-label="Try Database CDC Pipeline example" data-prompt="Monitor a PostgreSQL products table for changes and publish inventory events in real-time">
+        <div class="example-icon blue" aria-hidden="true">&#128451;</div>
+        <h3>Database CDC Pipeline</h3>
+        <p>Monitor a PostgreSQL products table for changes and publish inventory events in real-time</p>
+      </div>
+      <div class="example-card" tabindex="0" role="button" aria-label="Try REST API Gateway example" data-prompt="Expose a Petstore OpenAPI spec as event-driven integration with CRUD operations mapped to Solace topics">
+        <div class="example-icon purple" aria-hidden="true">&#128279;</div>
+        <h3>REST API Gateway</h3>
+        <p>Expose a Petstore OpenAPI spec as event-driven integration with CRUD operations mapped to Solace topics</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Chat Section ── -->
+<section class="chat-section" id="chat">
+  <div class="container">
+    <div class="section-label">AI Advisor</div>
+    <h2 class="section-title">Integration Designer</h2>
+    <p class="section-desc">Describe your integration scenario below. The advisor will propose a complete event-driven architecture.</p>
+    <div class="chat-container" role="region" aria-label="Chat with AI Integration Advisor">
+      <div class="chat-header">
+        <div class="chat-header-dot" aria-hidden="true"></div>
+        <div class="chat-header-title">Integration Advisor</div>
+        <div class="chat-header-subtitle">Powered by Solace PubSub+</div>
+      </div>
+      <div class="chat-messages" id="chatMessages" aria-live="polite" aria-relevant="additions">
+        <div class="chat-welcome">
+          <div class="chat-welcome-icon">
+            <svg viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect width="28" height="28" rx="6" fill="#00c895" fill-opacity=".15"/><path d="M8 14h4l2-4 2 8 2-4h4" stroke="#00c895" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>Ready to design</h3>
+          <p>Describe what your integration should do, or pick an example above to get started.</p>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <div class="chat-input-wrapper">
+          <textarea
+            class="chat-input"
+            id="chatInput"
+            placeholder="Describe your integration scenario..."
+            rows="1"
+            aria-label="Message input"
+          ></textarea>
+          <button class="chat-send" id="chatSend" aria-label="Send message" type="button">
+            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 10l7-7m0 0l7 7m-7-7v14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(90 10 10)"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Rate Limit Toast ── -->
+<div class="rate-limit-toast" id="rateLimitToast" role="status" aria-live="polite">Please wait a moment before sending again...</div>
+
+<!-- ── How It Works ── -->
+<section id="how-it-works" class="how-section">
+  <div class="container">
+    <div class="section-label">The Process</div>
+    <h2 class="section-title">How It Works</h2>
+    <p class="section-desc">Three steps from idea to production-ready, governed micro-integration.</p>
+    <div class="how-grid">
+      <div class="how-step">
+        <div class="how-step-number">1</div>
+        <h3>Describe</h3>
+        <p>Tell the advisor what your integration should do &mdash; sources, destinations, event patterns, and business requirements.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-step-number">2</div>
+        <h3>Design</h3>
+        <p>Get a complete event architecture proposal: topics, schemas, deployment strategy, and Event Portal registration.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-step-number">3</div>
+        <h3>Build</h3>
+        <p>Use the Agentic Integration Factory to generate, deploy, and govern the integration end to end.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer>
+  <div class="container">
+    <p>Powered by <a href="https://solace.com/products/event-broker/" target="_blank" rel="noopener">Solace PubSub+</a> and the Agentic Integration Factory</p>
+    <div class="footer-links">
+      <a href="https://github.com/solacese/agentic-integration-factory" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://docs.solace.com" target="_blank" rel="noopener">Solace Docs</a>
+      <a href="https://solace.com/products/portal/" target="_blank" rel="noopener">Event Portal</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function() {
+  'use strict';
+
+  // ── DOM References ──
+  const messagesEl = document.getElementById('chatMessages');
+  const inputEl = document.getElementById('chatInput');
+  const sendBtn = document.getElementById('chatSend');
+  const toastEl = document.getElementById('rateLimitToast');
+
+  // ── State ──
+  const API_URL = 'https://nujhfyh70e.execute-api.ca-central-1.amazonaws.com/chat';
+  const RATE_LIMIT_MS = 3000;
+  const MAX_HISTORY = 20;
+  let conversationHistory = [];
+  let isLoading = false;
+  let lastSendTime = 0;
+  let welcomeVisible = true;
+
+  // ── Auto-resize Textarea ──
+  function autoResize() {
+    inputEl.style.height = 'auto';
+    inputEl.style.height = Math.min(inputEl.scrollHeight, 160) + 'px';
+  }
+  inputEl.addEventListener('input', autoResize);
+
+  // ── Keyboard Handling ──
+  inputEl.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+  sendBtn.addEventListener('click', sendMessage);
+
+  // ── Example Cards ──
+  document.querySelectorAll('.example-card').forEach(function(card) {
+    function handleCard() {
+      var prompt = card.getAttribute('data-prompt');
+      if (prompt) {
+        inputEl.value = prompt;
+        autoResize();
+        document.getElementById('chat').scrollIntoView({ behavior: 'smooth' });
+        setTimeout(function() { sendMessage(); }, 400);
+      }
+    }
+    card.addEventListener('click', handleCard);
+    card.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handleCard();
+      }
+    });
+  });
+
+  // ── Rate Limiting ──
+  function showRateLimitToast() {
+    toastEl.classList.add('visible');
+    setTimeout(function() { toastEl.classList.remove('visible'); }, 2000);
+  }
+
+  // ── Send Message ──
+  function sendMessage() {
+    var text = inputEl.value.trim();
+    if (!text || isLoading) return;
+
+    var now = Date.now();
+    if (now - lastSendTime < RATE_LIMIT_MS) {
+      showRateLimitToast();
+      return;
+    }
+    lastSendTime = now;
+
+    if (welcomeVisible) {
+      var welcomeEl = messagesEl.querySelector('.chat-welcome');
+      if (welcomeEl) welcomeEl.remove();
+      welcomeVisible = false;
+    }
+
+    appendMessage('user', text);
+    conversationHistory.push({ role: 'user', content: text });
+    if (conversationHistory.length > MAX_HISTORY) {
+      conversationHistory = conversationHistory.slice(-MAX_HISTORY);
+    }
+
+    inputEl.value = '';
+    autoResize();
+    inputEl.focus();
+
+    fetchResponse();
+  }
+
+  // ── Append Message ──
+  function appendMessage(role, content) {
+    var wrapper = document.createElement('div');
+    wrapper.className = 'message message-' + role;
+
+    var avatar = document.createElement('div');
+    avatar.className = 'message-avatar';
+    avatar.setAttribute('aria-hidden', 'true');
+
+    if (role === 'user') {
+      avatar.textContent = 'U';
+    } else {
+      avatar.innerHTML = '<svg viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="6" fill="#00c895" fill-opacity=".15"/><path d="M8 14h4l2-4 2 8 2-4h4" stroke="#00c895" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    }
+
+    var bubble = document.createElement('div');
+    bubble.className = 'message-bubble';
+
+    if (role === 'assistant') {
+      bubble.innerHTML = renderMarkdown(content);
+    } else {
+      bubble.textContent = content;
+    }
+
+    wrapper.appendChild(avatar);
+    wrapper.appendChild(bubble);
+    messagesEl.appendChild(wrapper);
+    scrollToBottom();
+
+    return wrapper;
+  }
+
+  // ── Loading Indicator ──
+  function showLoading() {
+    var wrapper = document.createElement('div');
+    wrapper.className = 'message message-assistant';
+    wrapper.id = 'loadingMessage';
+
+    var avatar = document.createElement('div');
+    avatar.className = 'message-avatar';
+    avatar.setAttribute('aria-hidden', 'true');
+    avatar.innerHTML = '<svg viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="6" fill="#00c895" fill-opacity=".15"/><path d="M8 14h4l2-4 2 8 2-4h4" stroke="#00c895" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+    var bubble = document.createElement('div');
+    bubble.className = 'message-bubble';
+    bubble.innerHTML = '<div class="loading-dots" aria-label="Thinking"><span></span><span></span><span></span></div>';
+
+    wrapper.appendChild(avatar);
+    wrapper.appendChild(bubble);
+    messagesEl.appendChild(wrapper);
+    scrollToBottom();
+  }
+
+  function removeLoading() {
+    var el = document.getElementById('loadingMessage');
+    if (el) el.remove();
+  }
+
+  // ── Error Display ──
+  function showError(errorText) {
+    var wrapper = document.createElement('div');
+    wrapper.className = 'message-error';
+
+    wrapper.innerHTML =
+      '<div class="message-error-icon" aria-hidden="true">&#9888;</div>' +
+      '<div class="message-error-text">' + escapeHtml(errorText) + '</div>' +
+      '<button class="message-error-retry" aria-label="Retry sending message">Retry</button>';
+
+    wrapper.querySelector('.message-error-retry').addEventListener('click', function() {
+      wrapper.remove();
+      fetchResponse();
+    });
+
+    messagesEl.appendChild(wrapper);
+    scrollToBottom();
+  }
+
+  // ── Fetch Response ──
+  function fetchResponse() {
+    isLoading = true;
+    updateInputState();
+    showLoading();
+
+    var body = JSON.stringify({ messages: conversationHistory.slice() });
+
+    fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: body
+    })
+    .then(function(response) {
+      if (!response.ok) {
+        throw new Error('Server responded with status ' + response.status);
+      }
+      return response.json();
+    })
+    .then(function(data) {
+      removeLoading();
+      var content = data.content || 'I received your message but had trouble generating a response. Please try again.';
+      appendMessage('assistant', content);
+      conversationHistory.push({ role: 'assistant', content: content });
+      if (conversationHistory.length > MAX_HISTORY) {
+        conversationHistory = conversationHistory.slice(-MAX_HISTORY);
+      }
+    })
+    .catch(function(err) {
+      removeLoading();
+      showError('Unable to reach the advisor. ' + (err.message || 'Please check your connection and try again.'));
+    })
+    .finally(function() {
+      isLoading = false;
+      updateInputState();
+    });
+  }
+
+  // ── Input State ──
+  function updateInputState() {
+    inputEl.disabled = isLoading;
+    sendBtn.disabled = isLoading;
+  }
+
+  // ── Scroll ──
+  function scrollToBottom() {
+    requestAnimationFrame(function() {
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    });
+  }
+
+  // ── HTML Escape ──
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // ── Markdown Renderer ──
+  function renderMarkdown(text) {
+    if (!text) return '';
+
+    // Normalize line endings
+    text = text.replace(/\r\n/g, '\n');
+
+    // Extract code blocks to protect them from other processing
+    var codeBlocks = [];
+    text = text.replace(/```(\w*)\n?([\s\S]*?)```/g, function(match, lang, code) {
+      var idx = codeBlocks.length;
+      codeBlocks.push('<pre><code>' + escapeHtml(code.replace(/\n$/, '')) + '</code></pre>');
+      return '\x00CODEBLOCK' + idx + '\x00';
+    });
+
+    // Extract inline code
+    var inlineCodes = [];
+    text = text.replace(/`([^`\n]+)`/g, function(match, code) {
+      var idx = inlineCodes.length;
+      inlineCodes.push('<code>' + escapeHtml(code) + '</code>');
+      return '\x00INLINE' + idx + '\x00';
+    });
+
+    // Split into blocks by double newlines
+    var blocks = text.split(/\n{2,}/);
+    var html = [];
+
+    for (var i = 0; i < blocks.length; i++) {
+      var block = blocks[i].trim();
+      if (!block) continue;
+
+      // Check for code block placeholder
+      if (/^\x00CODEBLOCK\d+\x00$/.test(block)) {
+        html.push(block);
+        continue;
+      }
+
+      // Headers
+      if (/^#{1,6}\s/.test(block)) {
+        var headerMatch = block.match(/^(#{1,6})\s+(.*)/);
+        if (headerMatch) {
+          var level = headerMatch[1].length;
+          html.push('<h' + level + '>' + inlineFormat(headerMatch[2]) + '</h' + level + '>');
+          continue;
+        }
+      }
+
+      // Unordered list
+      if (/^[-*+]\s/.test(block)) {
+        var items = block.split('\n');
+        var listHtml = '<ul>';
+        for (var j = 0; j < items.length; j++) {
+          var item = items[j].replace(/^[-*+]\s+/, '');
+          if (item.trim()) {
+            listHtml += '<li>' + inlineFormat(item) + '</li>';
+          }
+        }
+        listHtml += '</ul>';
+        html.push(listHtml);
+        continue;
+      }
+
+      // Ordered list
+      if (/^\d+\.\s/.test(block)) {
+        var oitems = block.split('\n');
+        var olistHtml = '<ol>';
+        for (var k = 0; k < oitems.length; k++) {
+          var oitem = oitems[k].replace(/^\d+\.\s+/, '');
+          if (oitem.trim()) {
+            olistHtml += '<li>' + inlineFormat(oitem) + '</li>';
+          }
+        }
+        olistHtml += '</ol>';
+        html.push(olistHtml);
+        continue;
+      }
+
+      // Blockquote
+      if (/^>\s/.test(block)) {
+        var quoteContent = block.replace(/^>\s?/gm, '');
+        html.push('<blockquote>' + inlineFormat(quoteContent) + '</blockquote>');
+        continue;
+      }
+
+      // Horizontal rule
+      if (/^[-*_]{3,}$/.test(block.trim())) {
+        html.push('<hr>');
+        continue;
+      }
+
+      // Paragraph — handle single newlines as <br>
+      var lines = block.split('\n');
+      var paraLines = [];
+      for (var l = 0; l < lines.length; l++) {
+        var line = lines[l];
+        // If line looks like a list item inside a paragraph block
+        if (/^[-*+]\s/.test(line)) {
+          if (paraLines.length > 0) {
+            html.push('<p>' + inlineFormat(paraLines.join('<br>')) + '</p>');
+            paraLines = [];
+          }
+          // Start collecting list items
+          var subList = '<ul>';
+          for (; l < lines.length && /^[-*+]\s/.test(lines[l]); l++) {
+            subList += '<li>' + inlineFormat(lines[l].replace(/^[-*+]\s+/, '')) + '</li>';
+          }
+          l--; // step back since the for loop will increment
+          subList += '</ul>';
+          html.push(subList);
+        } else if (/^\d+\.\s/.test(line)) {
+          if (paraLines.length > 0) {
+            html.push('<p>' + inlineFormat(paraLines.join('<br>')) + '</p>');
+            paraLines = [];
+          }
+          var subOList = '<ol>';
+          for (; l < lines.length && /^\d+\.\s/.test(lines[l]); l++) {
+            subOList += '<li>' + inlineFormat(lines[l].replace(/^\d+\.\s+/, '')) + '</li>';
+          }
+          l--;
+          subOList += '</ol>';
+          html.push(subOList);
+        } else if (/^#{1,6}\s/.test(line)) {
+          if (paraLines.length > 0) {
+            html.push('<p>' + inlineFormat(paraLines.join('<br>')) + '</p>');
+            paraLines = [];
+          }
+          var hm = line.match(/^(#{1,6})\s+(.*)/);
+          if (hm) {
+            html.push('<h' + hm[1].length + '>' + inlineFormat(hm[2]) + '</h' + hm[1].length + '>');
+          }
+        } else {
+          paraLines.push(line);
+        }
+      }
+      if (paraLines.length > 0) {
+        html.push('<p>' + inlineFormat(paraLines.join('<br>')) + '</p>');
+      }
+    }
+
+    var result = html.join('\n');
+
+    // Restore code blocks
+    for (var ci = 0; ci < codeBlocks.length; ci++) {
+      result = result.replace('\x00CODEBLOCK' + ci + '\x00', codeBlocks[ci]);
+    }
+
+    // Restore inline codes
+    for (var ii = 0; ii < inlineCodes.length; ii++) {
+      result = result.split('\x00INLINE' + ii + '\x00').join(inlineCodes[ii]);
+    }
+
+    return result;
+  }
+
+  // ── Inline Formatting ──
+  function inlineFormat(text) {
+    // Bold + italic: ***text***
+    text = text.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+    // Bold: **text**
+    text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    // Italic: *text*
+    text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    // Strikethrough: ~~text~~
+    text = text.replace(/~~(.+?)~~/g, '<del>$1</del>');
+    // Links: [text](url)
+    text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+
+    return text;
+  }
+
+})();
+</script>
+</body>
+</html>
